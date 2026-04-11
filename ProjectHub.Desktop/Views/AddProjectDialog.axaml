@@ -1,0 +1,155 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="clr-namespace:ProjectHub.Desktop.ViewModels"
+        mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="700"
+        x:Class="ProjectHub.Desktop.Views.AddProjectDialog"
+        Title="{Binding DialogTitle}"
+        Width="600" Height="700"
+        MaxWidth="700" MaxHeight="800"
+        WindowStartupLocation="CenterOwner"
+        CanResize="True">
+    <Window.DataContext>
+        <vm:AddProjectDialogViewModel />
+    </Window.DataContext>
+    
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        
+        <ScrollViewer Grid.Row="0">
+            <StackPanel Spacing="16" Margin="0,0,8,0">
+                <!-- 项目名称 -->
+                <StackPanel Spacing="4">
+                    <TextBlock Text="项目名称 *" FontWeight="SemiBold" />
+                    <TextBox Text="{Binding ProjectName}" 
+                             Watermark="输入项目名称..." />
+                </StackPanel>
+                
+                <!-- 项目路径 -->
+                <StackPanel Spacing="4">
+                    <TextBlock Text="项目路径 *" FontWeight="SemiBold" />
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBox Grid.Column="0" 
+                                 Text="{Binding ProjectPath}" 
+                                 Watermark="选择项目路径..." />
+                        <Button Grid.Column="1" 
+                                Content="📁 文件夹" 
+                                Margin="8,0,0,0"
+                                Click="BrowseFolderButton_Click" />
+                        <Button Grid.Column="2" 
+                                Content="� 文件" 
+                                Margin="4,0,0,0"
+                                Click="BrowseFileButton_Click" />
+                    </Grid>
+                </StackPanel>
+                
+                <!-- 别名 -->
+                <StackPanel Spacing="4">
+                    <TextBlock Text="别名" FontWeight="SemiBold" />
+                    <TextBox Text="{Binding Alias}" 
+                             Watermark="输入别名（可选）..." />
+                </StackPanel>
+                
+                <!-- 描述 -->
+                <StackPanel Spacing="4">
+                    <TextBlock Text="描述" FontWeight="SemiBold" />
+                    <TextBox Text="{Binding Description}" 
+                             Watermark="输入项目描述（可选）..."
+                             AcceptsReturn="True"
+                             TextWrapping="Wrap"
+                             Height="80" />
+                </StackPanel>
+                
+                <!-- 标签 -->
+                <StackPanel Spacing="4">
+                    <TextBlock Text="标签（所属产品）" FontWeight="SemiBold" />
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBox Grid.Column="0"
+                                 Text="{Binding NewTagText}"
+                                 Watermark="输入标签名称..." />
+                        <Button Grid.Column="1" 
+                                Content="添加" 
+                                Width="60"
+                                Margin="8,0,0,0"
+                                Click="AddTagButton_Click" />
+                    </Grid>
+                    <ItemsControl ItemsSource="{Binding SelectedTags}" Margin="0,4,0,0">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Background="#E3F2FD" 
+                                        CornerRadius="12" 
+                                        Padding="8,4" 
+                                        Margin="2">
+                                    <StackPanel Orientation="Horizontal" Spacing="4">
+                                        <TextBlock Text="{Binding}" FontSize="12" />
+                                        <Button Content="×" 
+                                                FontSize="12" 
+                                                Padding="0"
+                                                Width="16" 
+                                                Height="16"
+                                                Click="RemoveTagButton_Click"
+                                                Tag="{Binding}" />
+                                    </StackPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <TextBlock Text="提示：输入标签名称后点击添加，点击×可删除标签" 
+                               FontSize="11" 
+                               Foreground="#6C757D" />
+                </StackPanel>
+                
+                <!-- 默认IDE -->
+                <StackPanel Spacing="4">
+                    <TextBlock Text="默认IDE" FontWeight="SemiBold" />
+                    <ComboBox ItemsSource="{Binding AvailableIdes}"
+                              SelectedItem="{Binding SelectedIde}"
+                              IsEnabled="{Binding IsIdeEnabled}" />
+                    <TextBlock Text="提示：选择文件时无法使用IDE打开" 
+                               FontSize="11" 
+                               Foreground="#6C757D"
+                               IsVisible="{Binding IsFile}" />
+                </StackPanel>
+                
+                <!-- 外观设置 -->
+                <StackPanel Spacing="8">
+                    <TextBlock Text="外观设置" FontWeight="SemiBold" />
+                    <CheckBox Content="收藏项目" IsChecked="{Binding IsFavorite}" />
+                </StackPanel>
+            </StackPanel>
+        </ScrollViewer>
+        
+        <!-- 按钮 -->
+        <StackPanel Grid.Row="1" 
+                    Orientation="Horizontal" 
+                    HorizontalAlignment="Right" 
+                    Spacing="8"
+                    Margin="0,16,0,0">
+            <Button Content="取消" 
+                    Width="80" 
+                    Click="CancelButton_Click" />
+            <Button Content="保存" 
+                    Width="80" 
+                    Classes="PrimaryButton"
+                    Click="SaveButton_Click" />
+        </StackPanel>
+    </Grid>
+</Window>

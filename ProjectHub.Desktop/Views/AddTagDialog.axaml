@@ -1,0 +1,88 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="clr-namespace:ProjectHub.Desktop.ViewModels"
+        mc:Ignorable="d" d:DesignWidth="500" d:DesignHeight="450"
+        x:Class="ProjectHub.Desktop.Views.AddTagDialog"
+        Title="{Binding DialogTitle}"
+        Width="500" Height="450"
+        MaxWidth="600" MaxHeight="500"
+        WindowStartupLocation="CenterOwner"
+        CanResize="False">
+
+    <Design.DataContext>
+        <vm:AddTagDialogViewModel/>
+    </Design.DataContext>
+
+    <Grid RowDefinitions="Auto,*,Auto" Margin="20">
+        <StackPanel Grid.Row="0" Spacing="16">
+            <TextBlock Text="标签名称 *" FontWeight="SemiBold" />
+            <TextBox Text="{Binding TagName}" 
+                     Watermark="输入标签名称..."
+                     MaxLength="50" />
+            
+            <TextBlock Text="标签颜色" FontWeight="SemiBold" />
+            <StackPanel Spacing="12">
+                <TextBlock Text="预设颜色:" FontSize="12" Foreground="#6C757D" />
+                <ItemsControl ItemsSource="{Binding AvailableColors}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel Orientation="Horizontal" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Button Width="40" Height="40" 
+                                    CornerRadius="8" 
+                                    Margin="0,0,8,0"
+                                    Background="{Binding}"
+                                    Padding="0"
+                                    BorderThickness="0"
+                                    Command="{Binding $parent[ItemsControl].((vm:AddTagDialogViewModel)DataContext).SelectColorCommand}"
+                                    CommandParameter="{Binding}">
+                                <Button.Styles>
+                                    <Style Selector="Button:pointerover">
+                                        <Setter Property="Opacity" Value="0.8" />
+                                    </Style>
+                                    <Style Selector="Button.isselected">
+                                        <Setter Property="BorderBrush" Value="#2196F3" />
+                                        <Setter Property="BorderThickness" Value="3" />
+                                    </Style>
+                                </Button.Styles>
+                            </Button>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+
+            <TextBlock Text="预览:" FontWeight="SemiBold" />
+            <Border Background="{Binding TagColor}" 
+                    CornerRadius="6" 
+                    Padding="12,8">
+                <TextBlock Text="{Binding TagName}" 
+                           Foreground="White"
+                           FontWeight="SemiBold" />
+            </Border>
+
+            <TextBlock Text="{Binding ErrorMessage}" 
+                       Foreground="#e74c3c" 
+                       TextWrapping="Wrap" 
+                       IsVisible="{Binding ErrorMessage, Converter={x:Static ObjectConverters.IsNotNull}}" />
+        </StackPanel>
+
+        <StackPanel Grid.Row="2" 
+                    Orientation="Horizontal" 
+                    HorizontalAlignment="Right" 
+                    Spacing="8" 
+                    Margin="0,20,0,0">
+            <Button Content="取消" 
+                    Width="100" 
+                    Click="OnCancelClicked" />
+            <Button Content="保存" 
+                    Width="100" 
+                    Classes="Primary" 
+                    Click="OnSaveClicked" />
+        </StackPanel>
+    </Grid>
+</Window>

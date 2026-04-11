@@ -1,0 +1,134 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="clr-namespace:ProjectHub.Desktop.ViewModels"
+        mc:Ignorable="d" d:DesignWidth="700" d:DesignHeight="600"
+        x:Class="ProjectHub.Desktop.Views.IdeSettingsDialog"
+        Title="IDE设置"
+        Width="700" Height="600"
+        MinWidth="600" MinHeight="500"
+        WindowStartupLocation="CenterOwner">
+    <Window.DataContext>
+        <vm:IdeSettingsDialogViewModel />
+    </Window.DataContext>
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- 标题栏 -->
+        <StackPanel Grid.Row="0" Margin="0,0,0,20">
+            <TextBlock Text="⚙️ IDE设置" FontWeight="SemiBold" FontSize="20" />
+            <TextBlock Text="配置和管理您的IDE" FontSize="12" Foreground="#6C757D" Margin="0,4,0,0" />
+        </StackPanel>
+
+        <!-- 主内容区 -->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="20" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <!-- 左侧：IDE列表 -->
+            <Border Grid.Column="0" Background="#F8F9FA" BorderBrush="#E9ECEF" BorderThickness="1" CornerRadius="6" Padding="12">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <!-- 标题和检测按钮 -->
+                    <Grid Grid.Row="0" Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="已安装的IDE" FontWeight="SemiBold" FontSize="14" />
+                        <Button Grid.Column="1" Content="🔍 自动检测" Classes="ToolButton" Command="{Binding DetectIdesCommand}" />
+                    </Grid>
+
+                    <!-- 错误信息 -->
+                    <TextBlock Grid.Row="1" Text="{Binding ErrorMessage}" Foreground="#DC3545" FontSize="12" Margin="0,0,0,8" />
+
+                    <!-- IDE列表 -->
+                    <ScrollViewer Grid.Row="2">
+                        <ItemsControl ItemsSource="{Binding AvailableIdes}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Button Classes="IdeListItem" Padding="12,8" Margin="0,0,0,8"
+                                            HorizontalContentAlignment="Stretch" HorizontalAlignment="Stretch"
+                                            Command="{Binding $parent[ItemsControl].((vm:IdeSettingsDialogViewModel)DataContext).SelectIdeCommand}" CommandParameter="{Binding}">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Grid.Column="0" Text="{Binding Icon}" FontSize="16" Margin="0,0,8,0" />
+                                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="13" />
+                                                <TextBlock Text="{Binding ExecutablePath}" FontSize="11" Foreground="#6C757D" TextTrimming="CharacterEllipsis" />
+                                            </StackPanel>
+                                        </Grid>
+                                    </Button>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </Grid>
+            </Border>
+
+            <!-- 右侧：添加自定义IDE -->
+            <Border Grid.Column="2" Background="#F8F9FA" BorderBrush="#E9ECEF" BorderThickness="1" CornerRadius="6" Padding="12">
+                <StackPanel>
+                    <TextBlock Text="添加自定义IDE" FontWeight="SemiBold" FontSize="14" Margin="0,0,0,12" />
+
+                    <!-- IDE名称 -->
+                    <StackPanel Margin="0,0,0,12">
+                        <TextBlock Text="IDE名称 *" FontSize="12" Foreground="#6C757D" Margin="0,0,0,4" />
+                        <TextBox Text="{Binding NewIdeName}" Watermark="例如：IntelliJ IDEA" />
+                    </StackPanel>
+
+                    <!-- IDE路径 -->
+                    <StackPanel Margin="0,0,0,12">
+                        <TextBlock Text="可执行文件路径 *" FontSize="12" Foreground="#6C757D" Margin="0,0,0,4" />
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="8" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBox Grid.Column="0" Text="{Binding NewIdePath}" Watermark="选择IDE可执行文件" />
+                            <Button Grid.Column="2" Content="浏览..." Command="{Binding BrowseIdePathCommand}" />
+                        </Grid>
+                    </StackPanel>
+
+                    <!-- 命令参数 -->
+                    <StackPanel Margin="0,0,0,12">
+                        <TextBlock Text="默认参数" FontSize="12" Foreground="#6C757D" Margin="0,0,0,4" />
+                        <TextBox Text="{Binding NewIdeArgs}" Watermark="例如：--new-window" />
+                    </StackPanel>
+
+                    <!-- 添加按钮 -->
+                    <Button Content="添加IDE" Command="{Binding AddCustomIdeCommand}" Classes="PrimaryButton" HorizontalAlignment="Stretch" />
+
+                    <!-- 操作按钮 -->
+                    <StackPanel Margin="0,20,0,0" Spacing="8">
+                        <Button Content="更新选中的IDE" Command="{Binding UpdateSelectedIdeCommand}" HorizontalAlignment="Stretch" />
+                        <Button Content="删除选中的IDE" Command="{Binding DeleteSelectedIdeCommand}" Classes="DangerButton" HorizontalAlignment="Stretch" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <!-- 底部按钮 -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8" Margin="0,20,0,0">
+            <Button Content="关闭" Click="OnCloseClicked" Width="80" />
+        </StackPanel>
+    </Grid>
+</Window>

@@ -1,0 +1,50 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="clr-namespace:ProjectHub.Desktop.ViewModels"
+        mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="500"
+        x:Class="ProjectHub.Desktop.Views.QuickLauncherWindow"
+        Title="Project Hub - 快速启动" 
+        WindowStartupLocation="CenterScreen" 
+        CanResize="False" 
+        ShowInTaskbar="False">
+    <Window.DataContext>
+        <vm:QuickLauncherViewModel />
+    </Window.DataContext>
+    <Grid Background="#2C2C2C">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="60" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="40" />
+        </Grid.RowDefinitions>
+        <!-- 搜索框 -->
+        <TextBox Grid.Row="0" Watermark="搜索项目、别名、标签..." 
+                 FontSize="16" Padding="12" Background="#3C3C3C" Foreground="White" 
+                 BorderThickness="0" CornerRadius="8" Margin="20" />
+        <!-- 项目列表 -->
+        <ListBox Grid.Row="1" Background="Transparent" BorderThickness="0" Margin="20">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <Border Margin="0 5 0 5" Background="#3C3C3C" Padding="15" CornerRadius="8">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <TextBlock Grid.Row="0" Text="项目名称" FontSize="16" FontWeight="Bold" Foreground="White" />
+                            <TextBlock Grid.Row="1" Text="项目别名" FontSize="12" Foreground="#AAAAAA" Margin="0 5 0 0" />
+                            <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0 5 0 0">
+                                <TextBlock Text="标签" FontSize="12" Foreground="#888888" />
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+        <!-- 底部提示 -->
+        <TextBlock Grid.Row="2" Text="↵打开  Ctrl+1/2/3选IDE  Ctrl+E编辑  Ctrl+,打开管理" 
+                   FontSize="12" Foreground="#888888" HorizontalAlignment="Center" VerticalAlignment="Center" />
+    </Grid>
+</Window>

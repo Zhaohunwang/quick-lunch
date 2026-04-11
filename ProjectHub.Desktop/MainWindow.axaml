@@ -1,0 +1,208 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="clr-namespace:ProjectHub.Desktop.ViewModels"
+        xmlns:models="clr-namespace:ProjectHub.Core.Models;assembly=ProjectHub.Core"
+        xmlns:templates="clr-namespace:ProjectHub.Desktop.Templates"
+        xmlns:local="clr-namespace:ProjectHub.Desktop.Converters"
+        mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="650"
+        x:Class="ProjectHub.Desktop.MainWindow"
+        x:Name="root"
+        Title="Project Hub"
+        Width="1000" Height="650"
+        MinWidth="800" MinHeight="500">
+    <Window.DataContext>
+        <vm:MainWindowViewModel />
+    </Window.DataContext>
+    <Window.DataTemplates>
+        <DataTemplate DataType="models:Project">
+            <Border Background="LightBlue" Margin="0,5" Padding="10">
+                <TextBlock Text="{Binding Name}" />
+            </Border>
+        </DataTemplate>
+        <DataTemplate DataType="models:Workspace">
+            <Border Background="LightGreen" Margin="0,5" Padding="10">
+                <TextBlock Text="{Binding Name}" />
+            </Border>
+        </DataTemplate>
+    </Window.DataTemplates>
+    
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="200" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        
+        <!-- 左侧导航栏 -->
+        <Border Grid.Column="0" Background="#F8F9FA" BorderBrush="#E9ECEF" BorderThickness="0,0,1,0">
+            <ScrollViewer>
+                <StackPanel Margin="8">
+                    <!-- 项目分组 -->
+                    <TextBlock Text="项目" FontWeight="SemiBold" FontSize="12" Foreground="#6C757D" Margin="8,8,8,4" />
+                    <ToggleButton Name="AllProjectsButton"
+                            Content="{Binding AllProjectsText}" 
+                            Classes="NavigationButton"
+                            IsChecked="{Binding IsAllSelected}"
+                            Command="{Binding ShowAllProjectsCommand}" />
+                    <ToggleButton Name="FavoriteProjectsButton"
+                            Content="{Binding FavoriteProjectsText}" 
+                            Classes="NavigationButton"
+                            IsChecked="{Binding IsFavoriteSelected}"
+                            Command="{Binding ShowFavoriteProjectsCommand}" />
+                    <ToggleButton Name="RecentProjectsButton"
+                            Content="{Binding RecentProjectsText}" 
+                            Classes="NavigationButton"
+                            IsChecked="{Binding IsRecentSelected}"
+                            Command="{Binding ShowRecentProjectsCommand}" />
+                    
+                    <!-- 分隔线 -->
+                    <Separator Margin="8,12,8,12" Background="#E9ECEF" />
+                    
+                    <!-- 标签分组 -->
+                    <Grid Margin="8,8,8,4">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="标签" FontWeight="SemiBold" FontSize="12" Foreground="#6C757D" />
+                        <Button Grid.Column="1" Content="+" Classes="SmallButton" Command="{Binding AddTagCommand}" />
+                    </Grid>
+                    <ItemsControl ItemsSource="{Binding DisplayTags}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <ContentControl Content="{Binding}">
+                                    <ContentControl.ContentTemplate>
+                                        <templates:TagTemplateSelector />
+                                    </ContentControl.ContentTemplate>
+                                </ContentControl>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    
+                    <!-- 分隔线 -->
+                    <Separator Margin="8,12,8,12" Background="#E9ECEF" />
+                    
+                    <!-- 工作区分组 -->
+                    <Grid Margin="8,8,8,4">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="工作区" FontWeight="SemiBold" FontSize="12" Foreground="#6C757D" />
+                        <Button Grid.Column="1" Content="+" Classes="SmallButton" Command="{Binding AddWorkspaceCommand}" />
+                    </Grid>
+                    <ItemsControl ItemsSource="{Binding Workspaces}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Button Content="{Binding}" Classes="NavigationButton" />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    
+                    <!-- 分隔线 -->
+                    <Separator Margin="8,12,8,12" Background="#E9ECEF" />
+                    
+                    <!-- 设置 -->
+                    <TextBlock Text="设置" FontWeight="SemiBold" FontSize="12" Foreground="#6C757D" Margin="8,8,8,4" />
+                    <Button Content="⚙️ IDE设置" Classes="NavigationButton" Command="{Binding ShowIdeSettingsCommand}" />
+                </StackPanel>
+            </ScrollViewer>
+        </Border>
+        
+        <!-- 右侧内容区 -->
+        <Grid Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            
+            <!-- 工具栏 -->
+            <Border Grid.Row="0" Background="#FFFFFF" Padding="16,12" BorderBrush="#E9ECEF" BorderThickness="0,0,0,1">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    
+                    <!-- 搜索框 -->
+                    <TextBox Grid.Column="0" 
+                             x:Name="SearchTextBox" 
+                             Text="{Binding SearchQuery}"
+                             Watermark="🔍 搜索项目..." 
+                             Width="300"
+                             HorizontalAlignment="Left"
+                             VerticalAlignment="Center"
+                             TextChanged="SearchTextBox_TextChanged" />
+                    
+                    <!-- 右侧按钮组 -->
+                    <StackPanel Grid.Column="1" 
+                                Orientation="Horizontal" 
+                                VerticalAlignment="Center" 
+                                Spacing="8">
+                        <Button Content="🚀 快速启动" Classes="ToolButton" Command="{Binding QuickLaunchCommand}" ToolTip.Tip="快速打开最近访问的项目" />
+                        <Button Content="⚙️ IDE设置" Classes="ToolButton" Command="{Binding ShowIdeSettingsCommand}" />
+                        <Button Click="AddProjectButton_Click" 
+                                Content="+" 
+                                FontWeight="Bold" 
+                                FontSize="18" 
+                                Width="36" 
+                                Height="36"
+                                Classes="PrimaryButton" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+            
+            <!-- 主内容区 -->
+            <ScrollViewer Grid.Row="1" Background="#FFFFFF">
+                <StackPanel Margin="16">
+                    <!-- 全部项目区域 -->
+                    <Grid Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        
+                        <TextBlock Grid.Column="0" 
+                                   Text="📁 全部项目" 
+                                   FontWeight="SemiBold" 
+                                   FontSize="14" />
+                        
+                        <!-- 视图切换按钮 -->
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4">
+                            <ToggleButton Content="□" Classes="ViewButton" ToolTip.Tip="卡片视图" IsChecked="{Binding CurrentViewMode, Converter={x:Static local:StringEqualsConverter.Instance}, ConverterParameter='card'}" Command="{Binding ChangeViewModeCommand}" CommandParameter="card" />
+                            <ToggleButton Content="▤" Classes="ViewButton" ToolTip.Tip="列表视图" IsChecked="{Binding CurrentViewMode, Converter={x:Static local:StringEqualsConverter.Instance}, ConverterParameter='list'}" Command="{Binding ChangeViewModeCommand}" CommandParameter="list" />
+                            <ToggleButton Content="☰" Classes="ViewButton" ToolTip.Tip="紧凑视图" IsChecked="{Binding CurrentViewMode, Converter={x:Static local:StringEqualsConverter.Instance}, ConverterParameter='compact'}" Command="{Binding ChangeViewModeCommand}" CommandParameter="compact" />
+                        </StackPanel>
+                    </Grid>
+                    
+                    <!-- 项目列表 -->
+                    <ItemsControl ItemsSource="{Binding FilteredItems}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <ContentControl Content="{Binding}">
+                                    <ContentControl.ContentTemplate>
+                                        <DataTemplate>
+                                            <Grid>
+                                                <!-- 卡片视图 -->
+                                                <Border Background="LightBlue" Margin="0,5" Padding="10" IsVisible="{Binding $parent[Window].DataContext.CurrentViewMode, Converter={x:Static local:StringEqualsConverter.Instance}, ConverterParameter='card'}">
+                                                    <TextBlock Text="{Binding Name}" />
+                                                </Border>
+                                                <!-- 列表视图 -->
+                                                <Border Background="LightGreen" Margin="0,2" Padding="10" IsVisible="{Binding $parent[Window].DataContext.CurrentViewMode, Converter={x:Static local:StringEqualsConverter.Instance}, ConverterParameter='list'}">
+                                                    <TextBlock Text="{Binding Name}" />
+                                                </Border>
+                                                <!-- 紧凑视图 -->
+                                                <TextBlock Text="{Binding Name}" Margin="0,2" Padding="10" IsVisible="{Binding $parent[Window].DataContext.CurrentViewMode, Converter={x:Static local:StringEqualsConverter.Instance}, ConverterParameter='compact'}" />
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ContentControl.ContentTemplate>
+                                </ContentControl>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </ScrollViewer>
+        </Grid>
+    </Grid>
+</Window>
