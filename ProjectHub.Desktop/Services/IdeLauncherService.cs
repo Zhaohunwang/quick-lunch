@@ -57,6 +57,23 @@ namespace ProjectHub.Desktop.Services
             }
         }
 
+        public async Task LaunchProjectWithTemplateAsync(Project project, IdeTemplate ideTemplate)
+        {
+            var processStartInfo = new ProcessStartInfo
+            {
+                FileName = ideTemplate.ExecutablePath,
+                Arguments = $"{(string.IsNullOrEmpty(ideTemplate.DefaultArgs) ? string.Empty : ideTemplate.DefaultArgs)} \"{project.Path}\"",
+                UseShellExecute = true
+            };
+
+            Process.Start(processStartInfo);
+
+            project.LastOpenedAt = DateTime.UtcNow;
+            project.OpenCount++;
+            _dbContext.Projects.Update(project);
+            await _dbContext.SaveChangesAsync();
+        }
+
         public async Task<List<IdeTemplate>> GetAvailableIdesAsync()
         {
             return await Task.FromResult(_dbContext.IdeTemplates.ToList());

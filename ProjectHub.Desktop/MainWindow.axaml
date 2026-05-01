@@ -12,6 +12,16 @@
         Title="Project Hub"
         Width="1000" Height="650"
         MinWidth="800" MinHeight="500">
+
+    <Window.Styles>
+        <Style Selector=".SelectedTagButton" x:SetterTargetType="Button">
+            <Setter Property="Background" Value="#E3F2FD" />
+            <Setter Property="Foreground" Value="#1976D2" />
+            <Setter Property="BorderBrush" Value="#1976D2" />
+            <Setter Property="BorderThickness" Value="1" />
+        </Style>
+    </Window.Styles>
+    
     <Window.DataContext>
         <vm:MainWindowViewModel />
     </Window.DataContext>
@@ -177,30 +187,321 @@
                     </Grid>
                     
                     <!-- 项目列表 -->
-                    <ItemsControl ItemsSource="{Binding FilteredItems}">
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <ContentControl Content="{Binding}">
-                                    <ContentControl.ContentTemplate>
-                                        <DataTemplate>
-                                            <Grid>
-                                                <!-- 卡片视图 -->
-                                                <Border Background="LightBlue" Margin="0,5" Padding="10" IsVisible="{Binding $parent[Window].DataContext.CurrentViewMode, Converter={x:Static local:StringEqualsConverter.Instance}, ConverterParameter='card'}">
-                                                    <TextBlock Text="{Binding Name}" />
-                                                </Border>
-                                                <!-- 列表视图 -->
-                                                <Border Background="LightGreen" Margin="0,2" Padding="10" IsVisible="{Binding $parent[Window].DataContext.CurrentViewMode, Converter={x:Static local:StringEqualsConverter.Instance}, ConverterParameter='list'}">
-                                                    <TextBlock Text="{Binding Name}" />
-                                                </Border>
-                                                <!-- 紧凑视图 -->
-                                                <TextBlock Text="{Binding Name}" Margin="0,2" Padding="10" IsVisible="{Binding $parent[Window].DataContext.CurrentViewMode, Converter={x:Static local:StringEqualsConverter.Instance}, ConverterParameter='compact'}" />
+                    <Grid>
+                        <!-- 卡片模式：多列显示 -->
+                        <ItemsControl ItemsSource="{Binding FilteredItems}" 
+                                     IsVisible="{Binding CurrentViewMode, Converter={x:Static local:StringEqualsConverter.Instance}, ConverterParameter='card'}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel Orientation="Horizontal" 
+                                              HorizontalAlignment="Left" 
+                                              VerticalAlignment="Top" 
+                                              Margin="0,8,0,0"/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Background="#FFFFFF" 
+                                            BorderBrush="#E9ECEF" 
+                                            BorderThickness="1" 
+                                            CornerRadius="8"
+                                            Width="250"
+                                            Margin="8" 
+                                            Padding="16">
+                                        <Grid>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
+                                            
+                                            <!-- 第一行：图标 + 名称 + 收藏 + 操作按钮 -->
+                                            <Grid Grid.Row="0">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+                                                
+                                                <!-- 项目/工作区图标 -->
+                                                <TextBlock Grid.Column="0" 
+                                                           Text="{Binding Converter={x:Static local:ItemTypeToIconConverter.Instance}}" 
+                                                           FontSize="24" 
+                                                           Margin="0,0,12,0"
+                                                           VerticalAlignment="Center"/>
+                                                
+                                                <!-- 名称和别名 -->
+                                                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                                    <TextBlock Text="{Binding Name}" 
+                                                               FontSize="18" 
+                                                               FontWeight="SemiBold"
+                                                               VerticalAlignment="Center"/>
+                                                    <TextBlock Text="{Binding Alias, StringFormat=' ({0})'}" 
+                                                               FontSize="14" 
+                                                               Foreground="#6C757D"
+                                                               VerticalAlignment="Center"
+                                                               IsVisible="{Binding Alias, Converter={x:Static local:StringIsNotNullOrEmptyConverter.Instance}}"/>
+                                                </StackPanel>
+                                                
+                                                <!-- 收藏按钮 -->
+                                                <Button Grid.Column="2" 
+                                                        Content="{Binding IsFavorite, Converter={x:Static local:BoolToFavoriteIconConverter.Instance}}" 
+                                                        Classes="IconButton"
+                                                        Command="{Binding DataContext.ToggleFavoriteCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"
+                                                        CommandParameter="{Binding}"
+                                                        Margin="8,0"/>
+                                                
+                                                <!-- 更多操作 -->
+                                                <Button Grid.Column="3"
+                                                        Content="⋮"
+                                                        Classes="IconButton"
+                                                        ToolTip.Tip="更多操作"
+                                                        Tag="{Binding}"
+                                                        Click="OnMoreOptionsClick">
+                                                    <Button.ContextMenu>
+                                                        <ContextMenu>
+                                                            <MenuItem Header="编辑"
+                                                                      Command="{Binding EditProjectCommand}" />
+                                                            <MenuItem Header="删除"
+                                                                      Command="{Binding DeleteProjectCommand}" />
+                                                        </ContextMenu>
+                                                    </Button.ContextMenu>
+                                                </Button>
                                             </Grid>
-                                        </DataTemplate>
-                                    </ContentControl.ContentTemplate>
-                                </ContentControl>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
+                                            
+                                            <!-- 第二行：描述 -->
+                                            <TextBlock Grid.Row="1" 
+                                                       Text="{Binding Description}" 
+                                                       FontSize="13"
+                                                       Foreground="#6C757D"
+                                                       TextTrimming="CharacterEllipsis"
+                                                       MaxLines="2"
+                                                       Margin="0,8,0,0"
+                                                       IsVisible="{Binding Description, Converter={x:Static local:StringIsNotNullOrEmptyConverter.Instance}}"/>
+                                            
+                                            <!-- 第三行：标签 -->
+                                            <ItemsControl Grid.Row="2" 
+                                                          ItemsSource="{Binding Tags, Converter={x:Static local:TagsToLimitedConverter.Instance}, ConverterParameter='10'}"
+                                                          Margin="0,12,0,0">
+                                                <ItemsControl.ItemsPanel>
+                                                    <ItemsPanelTemplate>
+                                                        <StackPanel Orientation="Horizontal" Spacing="6"/>
+                                                    </ItemsPanelTemplate>
+                                                </ItemsControl.ItemsPanel>
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <Border Background="#E3F2FD" 
+                                                                CornerRadius="4" 
+                                                                Padding="6,3">
+                                                            <TextBlock Text="{Binding}" 
+                                                                       FontSize="12" 
+                                                                       Foreground="#1976D2"/>
+                                                        </Border>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                            
+                                            <!-- 第四行：路径和打开时间 + IDE按钮 -->
+                                            <Grid Grid.Row="3" Margin="0,12,0,0">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+                                                
+                                                <StackPanel Grid.Column="0" Orientation="Vertical">
+                                                    <TextBlock Text="{Binding Path}" 
+                                                               FontSize="11" 
+                                                               Foreground="#ADB5BD"
+                                                               TextTrimming="CharacterEllipsis"/>
+                                                    <TextBlock Text="{Binding LastOpenedAt, Converter={x:Static local:DateTimeToRelativeConverter.Instance}}" 
+                                                               FontSize="11" 
+                                                               Foreground="#ADB5BD"
+                                                               Margin="0,2,0,0"/>
+                                                </StackPanel>
+                                                
+                                                <!-- 默认IDE启动按钮 -->
+                                                <Button Grid.Column="1" 
+                                                        Content="{Binding Converter={x:Static local:DefaultIdeConverter.Instance}}"
+                                                        Classes="IdeButton"
+                                                        ToolTip.Tip="使用默认IDE打开项目"
+                                                        Command="{Binding DataContext.LaunchProjectCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"
+                                                        CommandParameter="{Binding}"/>
+                                            </Grid>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        
+                        <!-- 列表模式：单列显示 -->
+                        <ItemsControl ItemsSource="{Binding FilteredItems}" 
+                                     IsVisible="{Binding CurrentViewMode, Converter={x:Static local:StringEqualsConverter.Instance}, ConverterParameter='list'}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel VerticalAlignment="Top" 
+                                               Margin="0,8,0,0"/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Background="#FFFFFF" 
+                                            BorderBrush="#E9ECEF" 
+                                            BorderThickness="0,0,0,1" 
+                                            HorizontalAlignment="Stretch"
+                                            Margin="0,0,0,0"
+                                            Padding="12,10">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            
+                                            <!-- 图标 -->
+                                            <TextBlock Grid.Column="0" 
+                                                       Text="{Binding Converter={x:Static local:ItemTypeToIconConverter.Instance}}" 
+                                                       FontSize="18" 
+                                                       Margin="0,0,10,0"
+                                                       VerticalAlignment="Center"/>
+                                            
+                                            <!-- 名称和别名 -->
+                                            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding Name}" 
+                                                           FontSize="14" 
+                                                           FontWeight="Medium"
+                                                           VerticalAlignment="Center"/>
+                                                <TextBlock Text="{Binding Alias, StringFormat=' ({0})'}" 
+                                                           FontSize="12" 
+                                                           Foreground="#6C757D"
+                                                           VerticalAlignment="Center"
+                                                           IsVisible="{Binding Alias, Converter={x:Static local:StringIsNotNullOrEmptyConverter.Instance}}"/>
+                                                
+                                                <!-- 标签（最多3个） -->
+                                                <ItemsControl ItemsSource="{Binding Tags, Converter={x:Static local:TagsToLimitedConverter.Instance}, ConverterParameter='3'}"
+                                                              Margin="12,0,0,0"
+                                                              VerticalAlignment="Center">
+                                                    <ItemsControl.ItemsPanel>
+                                                        <ItemsPanelTemplate>
+                                                            <StackPanel Orientation="Horizontal" Spacing="4"/>
+                                                        </ItemsPanelTemplate>
+                                                    </ItemsControl.ItemsPanel>
+                                                    <ItemsControl.ItemTemplate>
+                                                        <DataTemplate>
+                                                            <Border Background="#E3F2FD" 
+                                                                    CornerRadius="3" 
+                                                                    Padding="4,2">
+                                                                <TextBlock Text="{Binding}" 
+                                                                           FontSize="10" 
+                                                                           Foreground="#1976D2"/>
+                                                            </Border>
+                                                        </DataTemplate>
+                                                    </ItemsControl.ItemTemplate>
+                                                </ItemsControl>
+                                            </StackPanel>
+                                            
+                                            <!-- 操作列 -->
+                                            <StackPanel Grid.Column="3" 
+                                                        Orientation="Horizontal" 
+                                                        Spacing="4">
+                                                <Button Content="{Binding Converter={x:Static local:DefaultIdeConverter.Instance}}" 
+                                                        Classes="SmallIconButton"
+                                                        ToolTip.Tip="使用默认IDE打开"
+                                                        Command="{Binding DataContext.LaunchProjectCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"
+                                                        CommandParameter="{Binding}"/>
+                                                <Button Content="{Binding IsFavorite, Converter={x:Static local:BoolToFavoriteIconConverter.Instance}}" 
+                                                        Classes="SmallIconButton"
+                                                        ToolTip.Tip="收藏项目"
+                                                        Command="{Binding DataContext.ToggleFavoriteCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"
+                                                        CommandParameter="{Binding}"/>
+                                                <!-- 更多操作（IDE子菜单在code-behind动态注入） -->
+                                                <Button Content="⋮" 
+                                                        Classes="SmallIconButton"
+                                                        ToolTip.Tip="更多操作"
+                                                        Tag="{Binding}"
+                                                        Click="OnMoreOptionsClick">
+                                                    <Button.ContextMenu>
+                                                        <ContextMenu>
+                                                            <MenuItem Header="编辑" 
+                                                                      Command="{Binding EditProjectCommand}" 
+                                                                      CommandParameter="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />
+                                                            <MenuItem Header="删除" 
+                                                                      Command="{Binding DeleteProjectCommand}" 
+                                                                      CommandParameter="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />
+                                                        </ContextMenu>
+                                                    </Button.ContextMenu>
+                                                </Button>
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        
+                        <!-- 紧凑模式：单列显示 -->
+                        <ItemsControl ItemsSource="{Binding FilteredItems}" 
+                                     IsVisible="{Binding CurrentViewMode, Converter={x:Static local:StringEqualsConverter.Instance}, ConverterParameter='compact'}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel VerticalAlignment="Top" 
+                                               Margin="0,8,0,0"/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Background="#FFFFFF" 
+                                            BorderBrush="#E9ECEF" 
+                                            BorderThickness="0,0,0,1" 
+                                            HorizontalAlignment="Stretch"
+                                            Margin="0,0,0,0"
+                                            Padding="8,6">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            
+                                            <!-- 收藏图标 -->
+                                            <TextBlock Grid.Column="0" 
+                                                       Text="{Binding IsFavorite, Converter={x:Static local:BoolToFavoriteIconConverter.Instance}}" 
+                                                       FontSize="12" 
+                                                       Margin="0,0,8,0"
+                                                       VerticalAlignment="Center"/>
+                                            
+                                            <!-- 名称 -->
+                                            <TextBlock Grid.Column="1" 
+                                                       Text="{Binding Name}" 
+                                                       FontSize="13"
+                                                       VerticalAlignment="Center"
+                                                       TextTrimming="CharacterEllipsis"/>
+                                            
+                                            <!-- 打开按钮 -->
+                                            <Button Grid.Column="2" 
+                                                    Content="{Binding Converter={x:Static local:DefaultIdeConverter.Instance}}"
+                                                    Classes="SmallIconButton"
+                                                    ToolTip.Tip="使用默认IDE打开"
+                                                    Command="{Binding DataContext.LaunchProjectCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"
+                                                    CommandParameter="{Binding}">
+                                                <Button.ContextMenu>
+                                                    <ContextMenu x:Name="CompactItemContextMenu">
+                                                        <MenuItem Header="编辑" 
+                                                                  Command="{Binding EditProjectCommand}" 
+                                                                  CommandParameter="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />
+                                                        <MenuItem Header="删除" 
+                                                                  Command="{Binding DeleteProjectCommand}" 
+                                                                  CommandParameter="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />
+                                                    </ContextMenu>
+                                                </Button.ContextMenu>
+                                            </Button>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </Grid>
                 </StackPanel>
             </ScrollViewer>
         </Grid>

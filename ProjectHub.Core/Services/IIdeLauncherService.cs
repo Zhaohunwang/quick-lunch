@@ -11,7 +11,9 @@ namespace ProjectHub.Core.Services
     {
         Task LaunchProjectAsync(Project project, string? ideName = null);
 
-        Task<List<IdeTemplate>> GetAvailableIdesAsync();
+    Task LaunchProjectWithTemplateAsync(Project project, IdeTemplate ideTemplate);
+
+    Task<List<IdeTemplate>> GetAvailableIdesAsync();
 
         Task AddIdeTemplateAsync(IdeTemplate template);
 

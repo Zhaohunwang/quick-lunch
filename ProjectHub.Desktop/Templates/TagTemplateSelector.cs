@@ -21,6 +21,14 @@ namespace ProjectHub.Desktop.Templates
                     Classes = { "NavigationButton" }
                 };
 
+                // 检查标签是否被选中
+                var itemsControl = button.FindAncestorOfType<ItemsControl>();
+                var mainWindowViewModel = itemsControl?.DataContext as MainWindowViewModel;
+                if (mainWindowViewModel != null && mainWindowViewModel.SelectedTag == tag)
+                {
+                    button.Classes.Add("SelectedTagButton");
+                }
+
                 button.Click += (sender, e) =>
                 {
                     var btn = sender as Button;

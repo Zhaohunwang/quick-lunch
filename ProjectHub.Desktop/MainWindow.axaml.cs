@@ -1,8 +1,11 @@
 using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
 using Avalonia.Interactivity;
 using Avalonia.Threading;
+using ProjectHub.Core.Models;
 using ProjectHub.Desktop.ViewModels;
 using System.ComponentModel;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace ProjectHub.Desktop;
@@ -66,9 +69,9 @@ public partial class MainWindow : Window
     private void UpdateNavigationButtonStyles(MainWindowViewModel viewModel)
     {
         // 获取按钮引用
-        var allProjectsButton = this.FindControl<Button>("AllProjectsButton");
-        var favoriteProjectsButton = this.FindControl<Button>("FavoriteProjectsButton");
-        var recentProjectsButton = this.FindControl<Button>("RecentProjectsButton");
+        var allProjectsButton = this.FindControl<ToggleButton>("AllProjectsButton");
+        var favoriteProjectsButton = this.FindControl<ToggleButton>("FavoriteProjectsButton");
+        var recentProjectsButton = this.FindControl<ToggleButton>("RecentProjectsButton");
 
         // 更新按钮样式
         UpdateButtonStyle(allProjectsButton, viewModel.IsAllSelected);
@@ -76,7 +79,7 @@ public partial class MainWindow : Window
         UpdateButtonStyle(recentProjectsButton, viewModel.IsRecentSelected);
     }
 
-    private void UpdateButtonStyle(Button? button, bool isSelected)
+    private void UpdateButtonStyle(ToggleButton? button, bool isSelected)
     {
         if (button == null) return;
 
@@ -103,5 +106,58 @@ public partial class MainWindow : Window
         {
             await viewModel.SearchCommand.ExecuteAsync(null);
         }
+    }
+
+    private void OnMoreOptionsClick(object? sender, RoutedEventArgs e)
+    {
+        if (sender is Button button && button.ContextMenu != null)
+        {
+            button.ContextMenu.DataContext = DataContext;
+
+            foreach (var item in button.ContextMenu.Items)
+            {
+                if (item is MenuItem menuItem)
+                {
+                    menuItem.CommandParameter = button.Tag;
+                }
+            }
+
+            InjectIdeSubMenu(button.ContextMenu, button.Tag as Project);
+            button.ContextMenu.Open(button);
+        }
+    }
+
+    private void InjectIdeSubMenu(ContextMenu contextMenu, Project? project)
+    {
+        if (project == null || DataContext is not MainWindowViewModel vm) return;
+
+        var defaultIde = vm.GetDefaultIdeTemplate(project);
+
+        var ideMenuItem = new MenuItem { Header = "💻 使用IDE打开" };
+
+        if (vm.AvailableIdes.Any())
+        {
+            foreach (var ide in vm.AvailableIdes)
+            {
+                var capturedIde = ide;
+                var isDefault = defaultIde?.Id == ide.Id;
+                var ideSubItem = new MenuItem 
+                { 
+                    Header = $"{ide.Icon ?? "💻"} {(isDefault ? "✓ " : "")}{ide.Name}"
+                };
+                ideSubItem.Click += async (s, args) =>
+                {
+                    await vm.LaunchWithIdeCommand.ExecuteAsync((project, capturedIde));
+                };
+                ideMenuItem.Items.Add(ideSubItem);
+            }
+        }
+        else
+        {
+            ideMenuItem.Items.Add(new MenuItem { Header = "(暂无IDE，请先配置)", IsEnabled = false });
+        }
+
+        contextMenu.Items.Insert(0, ideMenuItem);
+        contextMenu.Items.Insert(1, new Separator());
     }
 }

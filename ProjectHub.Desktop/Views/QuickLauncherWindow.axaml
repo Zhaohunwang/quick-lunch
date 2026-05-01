@@ -44,7 +44,7 @@
             </ListBox.ItemTemplate>
         </ListBox>
         <!-- 底部提示 -->
-        <TextBlock Grid.Row="2" Text="↵打开  Ctrl+1/2/3选IDE  Ctrl+E编辑  Ctrl+,打开管理" 
+        <TextBlock Grid.Row="2" Text="↵打开(默认IDE)  ⋮→选择其他IDE  Ctrl+E编辑" 
                    FontSize="12" Foreground="#888888" HorizontalAlignment="Center" VerticalAlignment="Center" />
     </Grid>
 </Window>

@@ -40,6 +40,15 @@ namespace ProjectHub.Desktop.Services
         public async Task<Project> UpdateProjectAsync(Project project)
         {
             project.UpdatedAt = DateTime.UtcNow;
+            
+            var existingProject = await _dbContext.Projects.FindAsync(project.Id);
+            if (existingProject != null)
+            {
+                _dbContext.Entry(existingProject).CurrentValues.SetValues(project);
+                await _dbContext.SaveChangesAsync();
+                return existingProject;
+            }
+            
             _dbContext.Projects.Update(project);
             await _dbContext.SaveChangesAsync();
             return project;

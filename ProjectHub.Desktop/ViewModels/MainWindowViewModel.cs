@@ -57,6 +57,9 @@ namespace ProjectHub.Desktop.ViewModels
         [ObservableProperty]
         private string _selectedTag = string.Empty;
 
+        [ObservableProperty]
+        private ObservableCollection<IdeTemplate> _availableIdes = new();
+
         public string AllProjectsText => $"📁 全部({AllProjectsCount})";
         public string FavoriteProjectsText => $"⭐ 收藏({FavoriteProjectsCount})";
         public string RecentProjectsText => $"🕐 最近({RecentProjectsCount})";
@@ -89,18 +92,25 @@ namespace ProjectHub.Desktop.ViewModels
             _tagService = new TagService();
             _workspaceService = new WorkspaceService(_projectService);
             
-            // 同步加载标签数据
             LoadTagsSync();
-            
-            // 异步加载其他数据
-            _ = InitializeAsync();
+            _ = LoadDataAsync();
+            _ = LoadAvailableIdesAsync();
         }
         
-        private async Task InitializeAsync()
+        private async Task LoadDataAsync()
         {
             await LoadProjectsAndWorkspacesAsync();
-            // 确保数据加载完成后再应用筛选
             ApplyFilter();
+        }
+
+        private async Task LoadAvailableIdesAsync()
+        {
+            var ides = await _ideLauncherService.GetAvailableIdesAsync();
+            AvailableIdes.Clear();
+            foreach (var ide in ides)
+            {
+                AvailableIdes.Add(ide);
+            }
         }
 
         private void LoadTagsSync()
@@ -128,7 +138,9 @@ namespace ProjectHub.Desktop.ViewModels
 
         private async Task LoadProjects()
         {
+            Console.WriteLine("LoadProjects started");
             var projects = await _projectService.GetAllProjectsAsync();
+            Console.WriteLine($"Projects loaded: {projects.Count}");
             Projects.Clear();
             foreach (var project in projects)
             {
@@ -137,40 +149,42 @@ namespace ProjectHub.Desktop.ViewModels
             AllProjectsCount = projects.Count;
             FavoriteProjectsCount = projects.Count(p => p.IsFavorite);
             RecentProjectsCount = projects.Count(p => p.LastOpenedAt > DateTime.UtcNow.AddDays(-7));
+            Console.WriteLine($"Counts: All={AllProjectsCount}, Favorite={FavoriteProjectsCount}, Recent={RecentProjectsCount}");
             OnPropertyChanged(nameof(AllProjectsText));
             OnPropertyChanged(nameof(FavoriteProjectsText));
             OnPropertyChanged(nameof(RecentProjectsText));
             
-            // 加载工作区并添加到AllItems
             await LoadWorkspacesForList();
             
-            // 确保在所有数据加载完成后再应用筛选
             ApplyFilter();
+            Console.WriteLine("LoadProjects completed");
         }
 
         private async Task LoadWorkspacesForList()
         {
+            Console.WriteLine("LoadWorkspacesForList started");
             var workspaces = await _workspaceService.GetAllWorkspacesAsync();
+            Console.WriteLine($"Workspaces loaded: {workspaces.Count}");
             
-            // 清空并重新构建 AllItems
             AllItems.Clear();
             
-            // 添加工作区
             foreach (var workspace in workspaces)
             {
                 AllItems.Add(workspace);
+                Console.WriteLine($"Added workspace: {workspace.Name}");
             }
             
-            // 添加项目
             foreach (var project in Projects)
             {
                 AllItems.Add(project);
+                Console.WriteLine($"Added project: {project.Name}");
             }
+            Console.WriteLine($"AllItems count: {AllItems.Count}");
+            Console.WriteLine("LoadWorkspacesForList completed");
         }
 
         private void ApplyFilter()
         {
-            // 筛选项目
             IEnumerable<Project> filteredProjects = CurrentFilter switch
             {
                 "favorite" => Projects.Where(p => p.IsFavorite),
@@ -179,26 +193,30 @@ namespace ProjectHub.Desktop.ViewModels
                 _ => Projects
             };
 
-            // 构建混合列表：工作区 + 筛选后的项目
             FilteredItems.Clear();
             
-            // 添加所有工作区
-            foreach (var item in AllItems)
-            {
-                if (item is Core.Models.Workspace)
-                {
-                    FilteredItems.Add(item);
-                }
-            }
-            
-            // 添加筛选后的项目
             foreach (var project in filteredProjects)
             {
                 FilteredItems.Add(project);
             }
             
-            // 手动触发通知，确保 UI 更新
             OnPropertyChanged(nameof(FilteredItems));
+        }
+
+        public IdeTemplate? GetDefaultIdeTemplate(Project project)
+        {
+            if (project.DefaultIdeId.HasValue)
+            {
+                return AvailableIdes.FirstOrDefault(ide => ide.Id == project.DefaultIdeId.Value);
+            }
+            return AvailableIdes.FirstOrDefault();
+        }
+
+        [RelayCommand]
+        private async Task LaunchWithIde((Project Project, IdeTemplate Ide) param)
+        {
+            if (param.Project == null || param.Ide == null) return;
+            await _ideLauncherService.LaunchProjectWithTemplateAsync(param.Project, param.Ide);
         }
 
         [RelayCommand]
@@ -261,7 +279,6 @@ namespace ProjectHub.Desktop.ViewModels
             }
             catch (Exception ex)
             {
-                // 记录错误但不影响程序运行
                 Console.WriteLine($"加载标签失败: {ex.Message}");
             }
         }
@@ -326,15 +343,99 @@ namespace ProjectHub.Desktop.ViewModels
         [RelayCommand]
         private async Task DeleteProject(Project project)
         {
-            await _projectService.DeleteProjectAsync(project.Id);
-            Projects.Remove(project);
-            ApplyFilter();
-            AllProjectsCount = Projects.Count;
-            FavoriteProjectsCount = Projects.Count(p => p.IsFavorite);
-            RecentProjectsCount = Projects.Count(p => p.LastOpenedAt > DateTime.UtcNow.AddDays(-7));
-            OnPropertyChanged(nameof(AllProjectsText));
-            OnPropertyChanged(nameof(FavoriteProjectsText));
-            OnPropertyChanged(nameof(RecentProjectsText));
+            if (project == null) return;
+            
+            var mainWindow = App.Current?.ApplicationLifetime is Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime desktop
+                ? desktop.MainWindow as MainWindow
+                : null;
+            
+            if (mainWindow != null)
+            {
+                var dialog = new Avalonia.Controls.Window
+                {
+                    Title = "确认删除",
+                    Width = 400,
+                    Height = 200,
+                    WindowStartupLocation = Avalonia.Controls.WindowStartupLocation.CenterOwner,
+                    Background = Avalonia.Media.Brushes.White,
+                    BorderThickness = new Avalonia.Thickness(1),
+                    BorderBrush = Avalonia.Media.Brushes.LightGray,
+                    CornerRadius = new Avalonia.CornerRadius(8),
+                    Padding = new Avalonia.Thickness(0)
+                };
+                
+                var panel = new Avalonia.Controls.StackPanel { Margin = new Avalonia.Thickness(24) };
+                
+                var titleText = new Avalonia.Controls.TextBlock 
+                {
+                    Text = "确认删除",
+                    FontSize = 18,
+                    FontWeight = Avalonia.Media.FontWeight.SemiBold,
+                    Margin = new Avalonia.Thickness(0, 0, 0, 16)
+                };
+                panel.Children.Add(titleText);
+                
+                var contentText = new Avalonia.Controls.TextBlock 
+                {
+                    Text = $"确定要删除项目 '{project.Name}' 吗？",
+                    FontSize = 14,
+                    TextWrapping = Avalonia.Media.TextWrapping.Wrap,
+                    Margin = new Avalonia.Thickness(0, 0, 0, 24)
+                };
+                panel.Children.Add(contentText);
+                
+                var buttonPanel = new Avalonia.Controls.StackPanel 
+                {
+                    Orientation = Avalonia.Layout.Orientation.Horizontal,
+                    HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Right,
+                    Spacing = 12
+                };
+                
+                var cancelButton = new Avalonia.Controls.Button 
+                {
+                    Content = "取消",
+                    Width = 90,
+                    Height = 36,
+                    Background = Avalonia.Media.Brushes.Transparent,
+                    BorderThickness = new Avalonia.Thickness(1),
+                    BorderBrush = Avalonia.Media.Brushes.LightGray,
+                    CornerRadius = new Avalonia.CornerRadius(4)
+                };
+                
+                var deleteButton = new Avalonia.Controls.Button 
+                {
+                    Content = "删除",
+                    Width = 90,
+                    Height = 36,
+                    Background = Avalonia.Media.Brushes.Red,
+                    Foreground = Avalonia.Media.Brushes.White,
+                    CornerRadius = new Avalonia.CornerRadius(4)
+                };
+                
+                bool? dialogResult = null;
+                cancelButton.Click += (s, e) => { dialogResult = false; dialog.Close(); };
+                deleteButton.Click += (s, e) => { dialogResult = true; dialog.Close(); };
+                
+                buttonPanel.Children.Add(cancelButton);
+                buttonPanel.Children.Add(deleteButton);
+                panel.Children.Add(buttonPanel);
+                
+                dialog.Content = panel;
+                await dialog.ShowDialog(mainWindow);
+                
+                if (dialogResult == true)
+                {
+                    await _projectService.DeleteProjectAsync(project.Id);
+                    Projects.Remove(project);
+                    ApplyFilter();
+                    AllProjectsCount = Projects.Count;
+                    FavoriteProjectsCount = Projects.Count(p => p.IsFavorite);
+                    RecentProjectsCount = Projects.Count(p => p.LastOpenedAt > DateTime.UtcNow.AddDays(-7));
+                    OnPropertyChanged(nameof(AllProjectsText));
+                    OnPropertyChanged(nameof(FavoriteProjectsText));
+                    OnPropertyChanged(nameof(RecentProjectsText));
+                }
+            }
         }
 
         [RelayCommand]
@@ -380,6 +481,7 @@ namespace ProjectHub.Desktop.ViewModels
             {
                 Projects.Add(project);
             }
+            ApplyFilter();
         }
 
         [RelayCommand]
@@ -470,6 +572,7 @@ namespace ProjectHub.Desktop.ViewModels
             if (mainWindow != null)
             {
                 await dialog.ShowDialog(mainWindow);
+                await LoadAvailableIdesAsync();
             }
         }
 

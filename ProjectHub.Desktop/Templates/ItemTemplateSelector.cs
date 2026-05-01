@@ -45,11 +45,9 @@ namespace ProjectHub.Desktop.Templates
             grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Star });
             grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
 
-            // 左侧信息
             var leftPanel = new StackPanel();
             Grid.SetColumn(leftPanel, 0);
 
-            // 名称行
             var namePanel = new StackPanel 
             { 
                 Orientation = Orientation.Horizontal, 
@@ -70,7 +68,6 @@ namespace ProjectHub.Desktop.Templates
             });
             leftPanel.Children.Add(namePanel);
 
-            // 描述
             if (!string.IsNullOrEmpty(workspace.Description))
             {
                 leftPanel.Children.Add(new TextBlock 
@@ -82,7 +79,6 @@ namespace ProjectHub.Desktop.Templates
                 });
             }
 
-            // 标签
             if (workspace.AllTags.Any())
             {
                 var tagsPanel = new StackPanel 
@@ -109,7 +105,6 @@ namespace ProjectHub.Desktop.Templates
                 leftPanel.Children.Add(tagsPanel);
             }
 
-            // 右侧按钮
             var rightPanel = new StackPanel 
             { 
                 Orientation = Orientation.Horizontal, 
@@ -118,7 +113,6 @@ namespace ProjectHub.Desktop.Templates
             };
             Grid.SetColumn(rightPanel, 1);
 
-            // 打开按钮
             var openButton = new Button 
             { 
                 Content = "▶",
@@ -127,11 +121,9 @@ namespace ProjectHub.Desktop.Templates
             ToolTip.SetTip(openButton, "打开工作区");
             openButton.Click += (s, e) => 
             {
-                // TODO: 实现打开工作区功能
             };
             rightPanel.Children.Add(openButton);
 
-            // 编辑按钮
             var editButton = new Button 
             { 
                 Content = "✏️",
@@ -140,11 +132,9 @@ namespace ProjectHub.Desktop.Templates
             ToolTip.SetTip(editButton, "编辑工作区");
             editButton.Click += (s, e) => 
             {
-                // TODO: 实现编辑工作区功能
             };
             rightPanel.Children.Add(editButton);
 
-            // 删除按钮
             var deleteButton = new Button 
             { 
                 Content = "🗑️",
@@ -153,7 +143,6 @@ namespace ProjectHub.Desktop.Templates
             ToolTip.SetTip(deleteButton, "删除工作区");
             deleteButton.Click += (s, e) => 
             {
-                // TODO: 实现删除工作区功能
             };
             rightPanel.Children.Add(deleteButton);
 
@@ -181,11 +170,9 @@ namespace ProjectHub.Desktop.Templates
             grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Star });
             grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
 
-            // 左侧信息
             var leftPanel = new StackPanel();
             Grid.SetColumn(leftPanel, 0);
 
-            // 名称行
             var namePanel = new StackPanel 
             { 
                 Orientation = Orientation.Horizontal, 
@@ -206,7 +193,6 @@ namespace ProjectHub.Desktop.Templates
             });
             leftPanel.Children.Add(namePanel);
 
-            // 别名
             if (!string.IsNullOrEmpty(project.Alias))
             {
                 leftPanel.Children.Add(new TextBlock 
@@ -218,7 +204,6 @@ namespace ProjectHub.Desktop.Templates
                 });
             }
 
-            // 标签
             if (project.Tags.Any())
             {
                 var tagsPanel = new StackPanel 
@@ -245,7 +230,6 @@ namespace ProjectHub.Desktop.Templates
                 leftPanel.Children.Add(tagsPanel);
             }
 
-            // 右侧按钮
             var rightPanel = new StackPanel 
             { 
                 Orientation = Orientation.Horizontal, 
@@ -254,67 +238,96 @@ namespace ProjectHub.Desktop.Templates
             };
             Grid.SetColumn(rightPanel, 1);
 
-            // IDE菜单
-            var ideMenu = new Menu();
-            var ideMenuItem = new MenuItem 
-            { 
-                Header = "🚀 用IDE打开",
-                Classes = { "IdeMenuItem" }
-            };
-            ideMenuItem.Icon = new TextBlock { Text = "🚀" };
-            ideMenu.Items.Add(ideMenuItem);
-            rightPanel.Children.Add(ideMenu);
+            var vm = GetViewModel();
+            var defaultIde = vm?.GetDefaultIdeTemplate(project);
 
-            // 打开按钮
-            var openButton = new Button 
+            var defaultIdeButton = new Button 
             { 
-                Content = "▶",
+                Content = defaultIde != null ? $"{defaultIde.Icon ?? "💻"} 用{defaultIde.Name}打开" : "▶ 打开",
                 Classes = { "PlayButton" }
             };
-            ToolTip.SetTip(openButton, "打开项目");
-            openButton.Click += async (s, e) => 
+            ToolTip.SetTip(defaultIdeButton, defaultIde != null ? $"用 {defaultIde.Name} 打开" : "用默认IDE打开");
+            defaultIdeButton.Click += async (s, e) => 
             {
-                var mainWindow = GetMainWindow();
-                if (mainWindow?.DataContext is MainWindowViewModel vm)
+                if (vm != null)
                 {
-                    await vm.LaunchProjectCommand.ExecuteAsync(project);
+                    if (defaultIde != null)
+                    {
+                        await vm.LaunchWithIdeCommand.ExecuteAsync((project, defaultIde));
+                    }
+                    else
+                    {
+                        await vm.LaunchProjectCommand.ExecuteAsync(project);
+                    }
                 }
             };
-            rightPanel.Children.Add(openButton);
+            rightPanel.Children.Add(defaultIdeButton);
 
-            // 编辑按钮
-            var editButton = new Button 
+            var moreButton = new Button 
             { 
-                Content = "✏️",
-                Classes = { "ToolButton" }
+                Content = "⋮",
+                Classes = { "ToolButton" },
+                HorizontalContentAlignment = HorizontalAlignment.Center,
+                Padding = new Thickness(8, 4)
             };
-            ToolTip.SetTip(editButton, "编辑项目");
-            editButton.Click += async (s, e) => 
+            ToolTip.SetTip(moreButton, "更多操作");
+
+            var contextMenu = new ContextMenu();
+            var ideMenuItem = new MenuItem 
+            { 
+                Header = "💻 使用IDE打开"
+            };
+
+            if (vm != null && vm.AvailableIdes.Any())
             {
-                var mainWindow = GetMainWindow();
-                if (mainWindow?.DataContext is MainWindowViewModel vm)
+                foreach (var ide in vm.AvailableIdes)
+                {
+                    var ideSubItem = new MenuItem 
+                    { 
+                        Header = $"{ide.Icon ?? "💻"} {(defaultIde?.Id == ide.Id ? "✓ " : "")}{ide.Name}"
+                    };
+                    var capturedIde = ide;
+                    ideSubItem.Click += async (s, e) => 
+                    {
+                        if (vm != null)
+                        {
+                            await vm.LaunchWithIdeCommand.ExecuteAsync((project, capturedIde));
+                        }
+                    };
+                    ideMenuItem.Items.Add(ideSubItem);
+                }
+            }
+            else
+            {
+                var emptyItem = new MenuItem { Header = "(暂无IDE，请先配置)", IsEnabled = false };
+                ideMenuItem.Items.Add(emptyItem);
+            }
+            contextMenu.Items.Add(ideMenuItem);
+
+            contextMenu.Items.Add(new Separator());
+
+            var editMenuItem = new MenuItem { Header = "✏️ 编辑" };
+            editMenuItem.Click += async (s, e) => 
+            {
+                if (vm != null)
                 {
                     await vm.EditProjectCommand.ExecuteAsync(project);
                 }
             };
-            rightPanel.Children.Add(editButton);
+            contextMenu.Items.Add(editMenuItem);
 
-            // 删除按钮
-            var deleteButton = new Button 
-            { 
-                Content = "🗑️",
-                Classes = { "ToolButton" }
-            };
-            ToolTip.SetTip(deleteButton, "删除项目");
-            deleteButton.Click += async (s, e) => 
+            var deleteMenuItem = new MenuItem { Header = "🗑️ 删除" };
+            deleteMenuItem.Click += async (s, e) => 
             {
-                var mainWindow = GetMainWindow();
-                if (mainWindow?.DataContext is MainWindowViewModel vm)
+                if (vm != null)
                 {
                     await vm.DeleteProjectCommand.ExecuteAsync(project);
                 }
             };
-            rightPanel.Children.Add(deleteButton);
+            contextMenu.Items.Add(deleteMenuItem);
+
+            moreButton.ContextMenu = contextMenu;
+            rightPanel.Children.Add(moreButton);
 
             grid.Children.Add(leftPanel);
             grid.Children.Add(rightPanel);
@@ -323,11 +336,12 @@ namespace ProjectHub.Desktop.Templates
             return border;
         }
 
-        private MainWindow? GetMainWindow()
+        private MainWindowViewModel? GetViewModel()
         {
-            return App.Current?.ApplicationLifetime is Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime desktop
+            var mainWindow = App.Current?.ApplicationLifetime is Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime desktop
                 ? desktop.MainWindow as MainWindow
                 : null;
+            return mainWindow?.DataContext as MainWindowViewModel;
         }
     }
 }
