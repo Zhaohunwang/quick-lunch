@@ -12,15 +12,15 @@
     <EmbeddedResource Include="Assets\Config\ide_detection.json">
       <LogicalName>ide_detection.json</LogicalName>
     </EmbeddedResource>
+    <AvaloniaResource Include="Assets\app-icon.ico" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Avalonia" Version="11.1.0" />
     <PackageReference Include="Avalonia.Desktop" Version="11.1.0" />
-    <PackageReference Include="Avalonia.Themes.Fluent" Version="11.1.0" />
-    <PackageReference Include="Avalonia.Fonts.Inter" Version="11.1.0" />
-    <PackageReference Include="Material.Avalonia" Version="3.7.4" />
+    <PackageReference Include="Semi.Avalonia" Version="11.1.0" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
+    <PackageReference Include="Material.Icons.Avalonia" Version="2.2.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.0" />
     <PackageReference Include="System.Text.Json" Version="8.0.0" />
     <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->

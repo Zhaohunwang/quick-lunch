@@ -1,6 +1,8 @@
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using ProjectHub.Desktop.Converters;
+using ProjectHub.Desktop.Services;
 using ProjectHub.Desktop.Views;
 using System;
 
@@ -8,9 +10,13 @@ namespace ProjectHub.Desktop;
 
 public partial class App : Application
 {
+    public static ThemeService ThemeService { get; } = new();
+
     public override void Initialize()
     {
         AvaloniaXamlLoader.Load(this);
+        Resources.Add("StringFormatConverter", new StringFormatConverter());
+        ThemeService.LoadSavedTheme(this);
     }
 
     public override void OnFrameworkInitializationCompleted()
@@ -18,7 +24,6 @@ public partial class App : Application
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             desktop.MainWindow = new MainWindow();
-            // 注册全局快捷键
             RegisterGlobalHotKeys();
         }
 
@@ -27,8 +32,6 @@ public partial class App : Application
 
     private void RegisterGlobalHotKeys()
     {
-        // 这里将注册全局快捷键
-        // 暂时使用模拟实现，实际项目中需要使用全局快捷键库
         Console.WriteLine("Global hotkeys registered: Ctrl+Shift+P (Quick Launch), Ctrl+Shift+O (Manager)");
     }
 

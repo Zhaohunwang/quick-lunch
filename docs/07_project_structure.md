@@ -73,7 +73,8 @@ ProjectHub/
 │   │   ├── SettingsService.cs
 │   │   ├── WorkspaceService.cs
 │   │   ├── HotKeyService.cs
-│   │   └── WindowService.cs
+│   │   ├── WindowService.cs
+│   │   └── ThemeService.cs
 │   │
 │   ├── Converters/                     # 值转换器
 │   │   ├── BoolToVisibilityConverter.cs

@@ -9,9 +9,9 @@
 | 文件名 | 内容描述 |
 |--------|----------|
 | `01_project_overview.md` | 项目概述与需求分析 |
-| `02_tech_stack.md` | 技术选型与依赖 |
+| `02_tech_stack.md` | 技术选型、依赖与NuGet调整说明（Semi.Avalonia替代方案） |
 | `03_features.md` | 功能模块与优先级 |
-| `04_ui_design.md` | 交互设计与界面布局 |
+| `04_ui_design.md` | 交互设计、界面布局、Light/Dark主题系统、主题切换设计 |
 | `05_data_model.md` | 数据模型与实体定义 |
 | `06_mcp_support.md` | MCP支持规划与工具定义 |
 | `07_project_structure.md` | 项目结构与目录组织 |
@@ -33,10 +33,11 @@ Project Hub是一个跨平台的统一项目管理工具，用于管理多个IDE
 - 多IDE支持与配置
 - 标签系统与工作区管理
 - AI集成（MCP协议）
+- Light/Dark 主题切换（Semi.Avalonia）
 
 ### 技术栈
 
-- 前端：Avalonia UI 11.x
+- 前端：Avalonia UI 11.x + Semi.Avalonia
 - 运行时：.NET 8 (LTS)
 - 语言：C# 12
 - 数据库：SQLite
@@ -53,8 +54,9 @@ Project Hub是一个跨平台的统一项目管理工具，用于管理多个IDE
 7. **项目操作**：参考项目操作功能设计文档实现项目相关操作
 8. **工作区管理**：参考工作区新增/编辑交互设计文档实现工作区功能
 9. **IDE配置**：参考IDE设置功能设计文档实现IDE管理功能
+10. **主题系统**：参考交互设计文档中的主题系统设计章节实现 Light/Dark 主题切换
 
 ## 版本信息
 
-- 版本：1.0.0
-- 更新日期：2026-03-22
+- 版本：1.1.0
+- 更新日期：2026-05-02

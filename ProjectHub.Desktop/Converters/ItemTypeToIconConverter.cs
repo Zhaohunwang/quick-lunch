@@ -1,4 +1,5 @@
 using Avalonia.Data.Converters;
+using Material.Icons;
 using ProjectHub.Core.Models;
 using System;
 using System.Globalization;
@@ -13,9 +14,9 @@ namespace ProjectHub.Desktop.Converters
         {
             return value switch
             {
-                Project => "🚀",
-                Workspace => "💼",
-                _ => "📁"
+                Project => MaterialIconKind.LightningBolt,
+                Workspace => MaterialIconKind.BriefcaseOutline,
+                _ => MaterialIconKind.Folder
             };
         }
 

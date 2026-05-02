@@ -14,20 +14,19 @@ namespace ProjectHub.Desktop.Converters
         public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
         {
             if (value is not Project project)
-                return "▶ 打开";
+                return "打开";
 
             var vm = GetViewModel();
             if (vm == null)
-                return "▶ 打开";
+                return "打开";
 
             var defaultIde = vm.GetDefaultIdeTemplate(project);
             if (defaultIde != null)
             {
-                var icon = !string.IsNullOrEmpty(defaultIde.Icon) ? defaultIde.Icon : "💻";
-                return $"{icon} 用{defaultIde.Name}打开";
+                return $"用 {defaultIde.Name} 打开";
             }
 
-            return "▶ 打开";
+            return "打开";
         }
 
         public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)

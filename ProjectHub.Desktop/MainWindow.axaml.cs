@@ -19,10 +19,8 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
         
-        // 订阅加载完成事件，确保 UI 已经初始化
         Loaded += OnLoaded;
         
-        // 订阅 DataContext 变化，以便在 ViewModel 设置后监听属性变化
         DataContextChanged += OnDataContextChanged;
     }
     
@@ -88,7 +86,7 @@ public partial class MainWindow : Window
         
         if (isSelected)
         {
-            button.Classes.Add("Active");
+            button.Classes.Add("active");
         }
     }
 

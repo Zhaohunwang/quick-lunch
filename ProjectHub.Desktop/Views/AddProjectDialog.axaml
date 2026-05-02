@@ -3,6 +3,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="clr-namespace:ProjectHub.Desktop.ViewModels"
+        xmlns:icons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
         mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="700"
         x:Class="ProjectHub.Desktop.Views.AddProjectDialog"
         Title="{Binding DialogTitle}"
@@ -42,13 +43,21 @@
                                  Text="{Binding ProjectPath}" 
                                  Watermark="选择项目路径..." />
                         <Button Grid.Column="1" 
-                                Content="📁 文件夹" 
                                 Margin="8,0,0,0"
-                                Click="BrowseFolderButton_Click" />
+                                Click="BrowseFolderButton_Click">
+                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                <icons:MaterialIcon Kind="FolderOpen" Width="14" Height="14" />
+                                <TextBlock Text="文件夹" FontSize="12" />
+                            </StackPanel>
+                        </Button>
                         <Button Grid.Column="2" 
-                                Content="� 文件" 
                                 Margin="4,0,0,0"
-                                Click="BrowseFileButton_Click" />
+                                Click="BrowseFileButton_Click">
+                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                <icons:MaterialIcon Kind="FileOutline" Width="14" Height="14" />
+                                <TextBlock Text="文件" FontSize="12" />
+                            </StackPanel>
+                        </Button>
                     </Grid>
                 </StackPanel>
                 

@@ -4,6 +4,8 @@ using Avalonia.Controls.Templates;
 using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Media;
+using Material.Icons;
+using Material.Icons.Avalonia;
 using ProjectHub.Core.Models;
 using ProjectHub.Desktop.ViewModels;
 using System;
@@ -53,10 +55,11 @@ namespace ProjectHub.Desktop.Templates
                 Orientation = Orientation.Horizontal, 
                 Spacing = 8 
             };
-            namePanel.Children.Add(new TextBlock 
+            namePanel.Children.Add(new MaterialIcon 
             { 
-                Text = "📁", 
-                FontSize = 16, 
+                Kind = MaterialIconKind.BriefcaseOutline, 
+                Width = 16, 
+                Height = 16, 
                 VerticalAlignment = VerticalAlignment.Center 
             });
             namePanel.Children.Add(new TextBlock 
@@ -115,9 +118,9 @@ namespace ProjectHub.Desktop.Templates
 
             var openButton = new Button 
             { 
-                Content = "▶",
                 Classes = { "PlayButton" }
             };
+            openButton.Content = new MaterialIcon { Kind = MaterialIconKind.Play, Width = 12, Height = 12 };
             ToolTip.SetTip(openButton, "打开工作区");
             openButton.Click += (s, e) => 
             {
@@ -126,9 +129,9 @@ namespace ProjectHub.Desktop.Templates
 
             var editButton = new Button 
             { 
-                Content = "✏️",
                 Classes = { "ToolButton" }
             };
+            editButton.Content = new MaterialIcon { Kind = MaterialIconKind.Pencil, Width = 14, Height = 14 };
             ToolTip.SetTip(editButton, "编辑工作区");
             editButton.Click += (s, e) => 
             {
@@ -137,9 +140,9 @@ namespace ProjectHub.Desktop.Templates
 
             var deleteButton = new Button 
             { 
-                Content = "🗑️",
                 Classes = { "ToolButton" }
             };
+            deleteButton.Content = new MaterialIcon { Kind = MaterialIconKind.DeleteOutline, Width = 14, Height = 14 };
             ToolTip.SetTip(deleteButton, "删除工作区");
             deleteButton.Click += (s, e) => 
             {
@@ -178,10 +181,11 @@ namespace ProjectHub.Desktop.Templates
                 Orientation = Orientation.Horizontal, 
                 Spacing = 8 
             };
-            namePanel.Children.Add(new TextBlock 
+            namePanel.Children.Add(new MaterialIcon 
             { 
-                Text = "🚀", 
-                FontSize = 16, 
+                Kind = MaterialIconKind.LightningBolt, 
+                Width = 16, 
+                Height = 16, 
                 VerticalAlignment = VerticalAlignment.Center 
             });
             namePanel.Children.Add(new TextBlock 
@@ -243,7 +247,7 @@ namespace ProjectHub.Desktop.Templates
 
             var defaultIdeButton = new Button 
             { 
-                Content = defaultIde != null ? $"{defaultIde.Icon ?? "💻"} 用{defaultIde.Name}打开" : "▶ 打开",
+                Content = defaultIde != null ? $"用 {defaultIde.Name} 打开" : "打开",
                 Classes = { "PlayButton" }
             };
             ToolTip.SetTip(defaultIdeButton, defaultIde != null ? $"用 {defaultIde.Name} 打开" : "用默认IDE打开");
@@ -275,7 +279,7 @@ namespace ProjectHub.Desktop.Templates
             var contextMenu = new ContextMenu();
             var ideMenuItem = new MenuItem 
             { 
-                Header = "💻 使用IDE打开"
+                Header = "使用 IDE 打开"
             };
 
             if (vm != null && vm.AvailableIdes.Any())
@@ -284,7 +288,7 @@ namespace ProjectHub.Desktop.Templates
                 {
                     var ideSubItem = new MenuItem 
                     { 
-                        Header = $"{ide.Icon ?? "💻"} {(defaultIde?.Id == ide.Id ? "✓ " : "")}{ide.Name}"
+                        Header = $"{(defaultIde?.Id == ide.Id ? "✓ " : "")}{ide.Name}"
                     };
                     var capturedIde = ide;
                     ideSubItem.Click += async (s, e) => 
@@ -306,7 +310,7 @@ namespace ProjectHub.Desktop.Templates
 
             contextMenu.Items.Add(new Separator());
 
-            var editMenuItem = new MenuItem { Header = "✏️ 编辑" };
+            var editMenuItem = new MenuItem { Header = "编辑" };
             editMenuItem.Click += async (s, e) => 
             {
                 if (vm != null)
@@ -316,7 +320,7 @@ namespace ProjectHub.Desktop.Templates
             };
             contextMenu.Items.Add(editMenuItem);
 
-            var deleteMenuItem = new MenuItem { Header = "🗑️ 删除" };
+            var deleteMenuItem = new MenuItem { Header = "删除" };
             deleteMenuItem.Click += async (s, e) => 
             {
                 if (vm != null)

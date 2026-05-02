@@ -1,16 +1,14 @@
 <Application xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:converters="clr-namespace:ProjectHub.Desktop.Converters"
+             xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             xmlns:semi="https://irihi.tech/semi"
              x:Class="ProjectHub.Desktop.App"
-             RequestedThemeVariant="Light">
-             <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
-
-    <Application.Resources>
-        <converters:StringFormatConverter x:Key="StringFormatConverter" />
-    </Application.Resources>
+             RequestedThemeVariant="Default">
 
     <Application.Styles>
-        <FluentTheme />
+        <semi:SemiTheme Locale="zh-CN" />
+        <materialIcons:MaterialIconStyles />
         <StyleInclude Source="Assets/Styles/AppTheme.axaml" />
     </Application.Styles>
 </Application>

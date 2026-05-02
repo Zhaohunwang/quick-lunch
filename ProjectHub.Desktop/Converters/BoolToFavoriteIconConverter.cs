@@ -1,4 +1,5 @@
 using Avalonia.Data.Converters;
+using Material.Icons;
 using System;
 using System.Globalization;
 
@@ -12,9 +13,9 @@ namespace ProjectHub.Desktop.Converters
         {
             if (value is bool isFavorite && isFavorite)
             {
-                return "⭐";
+                return MaterialIconKind.Star;
             }
-            return "☆";
+            return MaterialIconKind.StarOutline;
         }
 
         public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)

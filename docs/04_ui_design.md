@@ -77,29 +77,34 @@
 │    工作区B   │                                          │
 │              │                                          │
 │  ─────────── │                                          │
-│  ⚙️ IDE设置  │                                          │
-│              │                                          │
+│  ⚙️ 设置     │                                          │
+│    IDE设置    │                                          │
+│  ┌──────────┐│                                          │
+│  │☀️浅色│🌙深色││                                          │
+│  └──────────┘│                                          │
 └──────────────┴──────────────────────────────────────────┘
 ```
 
 ### 左侧导航结构
 
 ```
-📁 全部          - 显示所有项目
-⭐ 收藏          - 显示收藏的项目
-🕐 最近          - 按访问时间排序
+FolderOpen 全部          - 显示所有项目
+Star 收藏               - 显示收藏的项目
+ClockOutline 最近       - 按访问时间排序
 ───────────────
-🏷️ 标签
+Tag 标签
    #web          - 按标签筛选
    #java
    #mobile
    ...
 ───────────────
-💼 工作区
+BriefcaseOutline 工作区
    工作区A       - 自定义工作区
    工作区B
 ───────────────
-⚙️ IDE设置      - 配置和管理IDE
+Cog 设置
+   IDE设置       - 配置和管理IDE
+   主题切换      - Light / Dark 模式切换
 ```
 
 ### 快速启动功能
@@ -191,11 +196,11 @@
 
 ### 视图切换
 
-| 视图 | 图标 | 说明 |
+| 视图 | Material Icon | 说明 |
 |------|------|------|
-| 卡片视图 | □ | 大卡片，显示详细信息 |
-| 列表视图 | ▤ | 紧凑列表，显示关键信息 |
-| 紧凑视图 | ☰ | 最小化显示，仅名称 |
+| 卡片视图 | ViewGridOutline | 大卡片，显示详细信息 |
+| 列表视图 | ViewListOutline | 紧凑列表，显示关键信息 |
+| 紧凑视图 | ViewHeadline | 最小化显示，仅名称 |
 
 ## 视图详细设计
 
@@ -208,10 +213,10 @@
 
 **显示内容：**
 1. **头部区域**
-   - 项目/工作区图标（🚀项目/💼工作区）
-   - 项目名称（18px，半粗体）
-   - 别名（14px，灰色，格式：(别名)）
-   - 收藏按钮（⭐/☆图标）
+   - 项目/工作区类型图标（项目→LightningBolt，工作区→BriefcaseOutline，使用 Material Icon）
+   - 项目名称（18px，半粗体，超长部分省略截断）
+   - 别名（14px，灰色，格式：(别名)，超长部分省略截断）
+   - 收藏按钮（Star/StarOutline Material Icon）
    - 更多按钮（⋮，点击显示菜单）
 
 2. **描述区域**
@@ -224,7 +229,7 @@
 4. **底部区域**
    - 项目路径（11px，灰色，超出部分省略）
    - 最后打开时间（相对时间，如"2小时前"）
-   - 默认IDE启动按钮（显示格式：`[IDE图标 用IDE名称打开]`，使用项目的DefaultIdeId确定显示哪个IDE）
+   - 默认IDE启动按钮（显示格式：`用 {IDE名称} 打开`，使用项目的DefaultIdeId确定显示哪个IDE）
 
 **交互功能：**
 - 点击收藏按钮切换收藏状态
@@ -250,7 +255,7 @@
 
 **显示内容：**
 1. **图标列**
-   - 项目/工作区类型图标
+   - 项目/工作区类型图标（Material Icon：项目→LightningBolt，工作区→BriefcaseOutline）
 
 2. **信息列**
    - 项目名称（14px，中等粗细）
@@ -258,8 +263,8 @@
    - 标签（最多3个，紧凑样式）
 
 3. **操作列**
-   - 快速启动按钮（▶，使用默认IDE打开）
-   - 收藏按钮（⭐/☆图标）
+   - 快速启动按钮（使用默认IDE打开）
+   - 收藏按钮（Star/StarOutline Material Icon）
    - 更多按钮（⋮，点击显示菜单）
 
 **交互功能：**
@@ -282,17 +287,20 @@
 **布局结构：**
 - 最小化单行布局，白色背景，底部边框
 - 内边距8px，垂直间距6px
-- 水平网格布局，分为3列
+- 水平网格布局，分为4列
 
 **显示内容：**
 1. **收藏列**
-   - 收藏图标（⭐/☆，12px）
+   - 收藏图标（Star/StarOutline Material Icon，12px）
 
-2. **名称列**
+2. **类型图标列**
+   - 项目/工作区类型图标（14px Material Icon，项目→LightningBolt，工作区→BriefcaseOutline）
+
+3. **名称列**
    - 项目名称（13px，单行，超出部分省略）
 
-3. **操作列**
-   - 快速启动按钮（▶，使用默认IDE打开）
+4. **操作列**
+   - 快速启动按钮（使用默认IDE打开）
 
 **交互功能：**
 - 点击/双击行或快速启动按钮使用项目的默认IDE打开项目
@@ -323,3 +331,444 @@
 - 卡片视图：在宽屏幕上可显示2-3列，窄屏幕自动调整为1列
 - 列表视图：自适应宽度，始终显示为单列
 - 紧凑视图：自适应宽度，始终显示为单列
+
+## 应用图标
+
+应用图标采用 ICO 格式，文件位于 `Assets/app-icon.ico`。
+
+**设计规范：**
+- 多尺寸支持（16x16, 32x32, 48x48, 256x256）
+- 风格：扁平化设计，蓝色渐变背景
+- 元素：文件夹 + 闪电标志，寓意「快速启动项目」
+
+**集成方式：**
+- 在 `MainWindow.axaml` 中通过 `Icon` 属性直接引用：
+  ```xml
+  Icon="avares://ProjectHub.Desktop/Assets/app-icon.ico"
+  ```
+- 作为 `AvaloniaResource` 嵌入到程序集中
+
+## 按钮样式系统
+
+### IconButton（卡片内操作按钮）
+
+用于卡片视图中的收藏按钮、更多按钮等。
+
+| 属性 | Light 值 | Dark 值 |
+|------|---------|---------|
+| Background | Transparent | Transparent |
+| Border | 无边框 | 无边框 |
+| Padding | 4 | 4 |
+| MinSize | 28x28 | 28x28 |
+| Hover 背景 | #F0F0F0 | #363650 |
+| Hover 前景 | #495057 | #B0B0BC |
+| Pressed 背景 | #E0E0E0 | #40405A |
+
+### SmallIconButton（列表/紧凑模式操作按钮）
+
+用于列表视图和紧凑视图中的操作按钮。
+
+| 属性 | Light 值 | Dark 值 |
+|------|---------|---------|
+| Background | Transparent | Transparent |
+| Border | 无边框 | 无边框 |
+| Padding | 6,4 | 6,4 |
+| Hover 背景 | #F0F0F0 | #363650 |
+| Hover 前景 | #495057 | #B0B0BC |
+| Pressed 背景 | #E0E0E0 | #40405A |
+
+## 依赖组件
+
+### Material Icons
+
+项目使用 `Material.Icons.Avalonia` 包提供图标支持。
+
+**NuGet 包：**
+- `Material.Icons.Avalonia` v2.2.0
+- `Material.Icons` v2.2.0
+
+**XAML 命名空间：**
+```xml
+xmlns:icons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+xmlns:micons="clr-namespace:Material.Icons;assembly=Material.Icons"
+```
+
+**App.axaml 注册：**
+```xml
+<materialIcons:MaterialIconStyles />
+```
+
+**常用图标映射：**
+| 用途 | 图标名称 |
+|------|---------|
+| 项目类型 | LightningBolt |
+| 工作区类型 | BriefcaseOutline |
+| 收藏 | Star / StarOutline |
+| 全部 | FolderOpen |
+| 收藏筛选 | Star |
+| 最近 | ClockOutline |
+| 标签 | Tag |
+| IDE设置 | Cog |
+| 主题切换(浅色) | WeatherSunny |
+| 主题切换(深色) | WeatherNight |
+
+## 主题系统设计
+
+### 基础主题框架
+
+项目采用 **Semi.Avalonia** 作为基础主题，替代原有的 FluentTheme + Material.Avalonia 方案。
+
+**App.axaml 配置：**
+```xml
+<Application xmlns:semi="https://irihi.tech/semi"
+             RequestedThemeVariant="Light">
+    <Application.Styles>
+        <semi:SemiTheme Locale="zh-CN" />
+        <materialIcons:MaterialIconStyles />
+        <StyleInclude Source="Assets/Styles/AppTheme.axaml" />
+    </Application.Styles>
+</Application>
+```
+
+### 色彩 Token 体系
+
+通过 Avalonia 原生 `ThemeDictionaries` 机制定义 Light/Dark 双主题色彩 Token：
+
+| Token 名称 | 用途 | Light 值 | Dark 值 |
+|---|---|---|---|
+| Primary | 主色调（强调色） | #0078D4 | #60CDFF |
+| PrimaryHover | 主色调悬停 | #106EBE | #4DB8E8 |
+| PrimaryPressed | 主色调按下 | #005A9E | #3AA5D6 |
+| PrimaryForeground | 主色上文字 | #FFFFFF | #003A5E |
+| Background | 主背景 | #FFFFFF | #1E1E2E |
+| Surface | 次级背景（侧栏/卡片） | #F8F9FA | #2A2A3C |
+| SurfaceVariant | 悬浮面板/弹出层 | #FFFFFF | #333348 |
+| Border | 边框/分隔线 | #E9ECEF | #3E3E55 |
+| BorderStrong | 强调边框 | #DEE2E6 | #4A4A62 |
+| TextPrimary | 主要文字 | #212529 | #E4E4E8 |
+| TextSecondary | 次要文字 | #495057 | #B0B0BC |
+| TextMuted | 辅助/提示文字 | #6C757D | #808090 |
+| HoverBackground | 通用悬停背景 | #F0F0F0 | #363650 |
+| HoverSurface | 卡片/列表项悬停 | #F8F9FA | #32324A |
+| PressedBackground | 通用按下背景 | #E0E0E0 | #40405A |
+| SelectedBackground | 选中态背景 | #E3F2FD | #1A3A5C |
+| SelectedForeground | 选中态文字 | #1976D2 | #60CDFF |
+| Danger | 危险/删除 | #DC3545 | #F47067 |
+| DangerHover | 危险悬停 | #C82333 | #E05550 |
+| DangerPressed | 危险按下 | #BD2130 | #CC4440 |
+| Success | 成功/启动 | #28A745 | #57E389 |
+| SuccessHover | 成功悬停 | #218838 | #4BD47A |
+| SuccessPressed | 成功按下 | #1E7E34 | #3FBE68 |
+| TagBackground | 标签背景 | #E3F2FD | #1A3A5C |
+| TagForeground | 标签文字 | #1976D2 | #60CDFF |
+
+### 组件样式 Light/Dark 对照
+
+#### Window 主窗口
+
+| 属性 | Light | Dark |
+|---|---|---|
+| Background | #FFFFFF | #1E1E2E |
+| FontFamily | Segoe UI | Segoe UI |
+
+#### 左侧导航栏
+
+| 属性 | Light | Dark |
+|---|---|---|
+| Background | #F8F9FA | #2A2A3C |
+| BorderBrush | #E9ECEF | #3E3E55 |
+| SectionTitle Foreground | #6C757D | #808090 |
+| Separator Background | #E9ECEF | #3E3E55 |
+
+#### Button 基础
+
+| 状态 | Light Background | Dark Background | Light Foreground | Dark Foreground |
+|---|---|---|---|---|
+| Normal | #F0F0F0 | #363650 | #333333 | #E4E4E8 |
+| Hover | #E0E0E0 | #40405A | — | — |
+| Pressed | #D0D0D0 | #4A4A62 | — | — |
+
+#### NavigationButton 导航按钮
+
+| 状态 | Light Background | Dark Background | Light Foreground | Dark Foreground |
+|---|---|---|---|---|
+| Normal | Transparent | Transparent | #495057 | #B0B0BC |
+| Hover | #E9ECEF | #363650 | #212529 | #E4E4E8 |
+| Pressed | #DEE2E6 | #40405A | — | — |
+| Active/Selected | #0078D4 | #60CDFF | #FFFFFF | #003A5E |
+
+#### ToolButton 工具栏按钮
+
+| 状态 | Light Background | Dark Background | Light Foreground | Dark Foreground | Light Border | Dark Border |
+|---|---|---|---|---|---|---|
+| Normal | Transparent | Transparent | #495057 | #B0B0BC | #E9ECEF | #3E3E55 |
+| Hover | #F8F9FA | #363650 | — | #E4E4E8 | #DEE2E6 | #4A4A62 |
+
+#### PrimaryButton 主要按钮
+
+| 状态 | Light Background | Dark Background | Light Foreground | Dark Foreground |
+|---|---|---|---|---|
+| Normal | #0078D4 | #60CDFF | #FFFFFF | #003A5E |
+| Hover | #106EBE | #4DB8E8 | — | — |
+| Pressed | #005A9E | #3AA5D6 | — | — |
+
+#### DangerButton 危险按钮
+
+| 状态 | Light Background | Dark Background | Light Foreground | Dark Foreground |
+|---|---|---|---|---|
+| Normal | #DC3545 | #F47067 | #FFFFFF | #1E1E2E |
+| Hover | #C82333 | #E05550 | — | — |
+| Pressed | #BD2130 | #CC4440 | — | — |
+
+#### PlayButton 启动按钮
+
+| 状态 | Light Background | Dark Background | Light Foreground | Dark Foreground |
+|---|---|---|---|---|
+| Normal | #28A745 | #57E389 | #FFFFFF | #1E1E2E |
+| Hover | #218838 | #4BD47A | — | — |
+| Pressed | #1E7E34 | #3FBE68 | — | — |
+
+#### IconButton / SmallIconButton
+
+| 状态 | Light Background | Dark Background | Light Foreground | Dark Foreground |
+|---|---|---|---|---|
+| Normal | Transparent | Transparent | #6C757D | #808090 |
+| Hover | #F0F0F0 | #363650 | #495057 | #B0B0BC |
+| Pressed | #E0E0E0 | #40405A | — | — |
+
+#### IdeButton IDE选择按钮
+
+| 状态 | Light Background | Dark Background | Light Foreground | Dark Foreground |
+|---|---|---|---|---|
+| Normal | #F8F9FA | #2A2A3C | #495057 | #B0B0BC |
+| Hover | #E9ECEF | #363650 | — | #E4E4E8 |
+
+#### IdeListItem IDE列表项
+
+| 状态 | Light Background | Dark Background | Light Foreground | Dark Foreground | Light Border | Dark Border |
+|---|---|---|---|---|---|---|
+| Normal | Transparent | Transparent | #495057 | #B0B0BC | #E9ECEF | #3E3E55 |
+| Hover | #F8F9FA | #32324A | — | #E4E4E8 | #DEE2E6 | #4A4A62 |
+| Pressed | #E9ECEF | #363650 | — | — | — | — |
+
+#### ViewButton 视图切换
+
+| 状态 | Light Background | Dark Background | Light Foreground | Dark Foreground | Light Border | Dark Border |
+|---|---|---|---|---|---|---|
+| Normal | Transparent | Transparent | #6C757D | #808090 | #E9ECEF | #3E3E55 |
+| Hover | #F8F9FA | #363650 | #495057 | #B0B0BC | #DEE2E6 | #4A4A62 |
+| Pressed | #E9ECEF | #32324A | — | — | — | — |
+| Active | #E3F2FD | #1A3A5C | #1976D2 | #60CDFF | #1976D2 | #60CDFF |
+
+#### SmallButton 小按钮 (+号等)
+
+| 状态 | Light Background | Dark Background | Light Foreground | Dark Foreground | Light Border | Dark Border |
+|---|---|---|---|---|---|---|
+| Normal | #E9ECEF | #3E3E55 | #495057 | #B0B0BC | #DEE2E6 | #4A4A62 |
+| Hover | #DEE2E6 | #4A4A62 | #212529 | #E4E4E8 | — | — |
+| Pressed | #CED4DA | #55556A | — | — | — | — |
+
+#### TextBox 文本框
+
+| 状态 | Light Background | Dark Background | Light Foreground | Dark Foreground | Light Border | Dark Border |
+|---|---|---|---|---|---|---|
+| Normal | #FFFFFF | #2A2A3C | #333333 | #E4E4E8 | #E9ECEF | #3E3E55 |
+| Focus | — | — | — | — | #0078D4 | #60CDFF |
+
+#### Menu / MenuItem
+
+| 状态 | Light Background | Dark Background | Light Foreground | Dark Foreground |
+|---|---|---|---|---|
+| Menu Background | #FFFFFF | #333348 | — | — |
+| Menu Border | #E9ECEF | #3E3E55 | — | — |
+| MenuItem Normal | Transparent | Transparent | — | #E4E4E8 |
+| MenuItem Hover | #F8F9FA | #363650 | — | — |
+
+#### Tag 标签
+
+| 属性 | Light | Dark |
+|---|---|---|
+| Normal Background | #E3F2FD | #1A3A5C |
+| Normal Foreground | #1976D2 | #60CDFF |
+| Normal BorderBrush | #1976D2 | #60CDFF |
+| Selected Background | #BBDEFB | #264F78 |
+| Selected Foreground | #0D47A1 | #60CDFF |
+
+#### Card 卡片
+
+| 属性 | Light | Dark |
+|---|---|---|
+| Background | #FFFFFF | #2A2A3C |
+| BorderBrush | #E9ECEF | #3E3E55 |
+| Hover Background | #F8F9FA | #32324A |
+| Hover BorderBrush | #DEE2E6 | #4A4A62 |
+
+### 整体布局效果
+
+**Light 模式：**
+```
+┌─────────────────────────────────────────────────────────┐
+│  Project Hub                              [-] [□] [×]   │
+├──────────────┬──────────────────────────────────────────┤
+│              │                                          │
+│  📁 全部(24) │   🔍 搜索项目...  [快速启动][IDE设置][+] │
+│  ⭐ 收藏(5)  │  ──────────────────────────────────────  │
+│  🕐 最近(10) │                                          │
+│              │   ┌─────────────────────────────────┐    │
+│  🏷️ 标签     │   │ 🚀 电商平台重构    [用VS Code][⋮]│    │
+│    #web      │   │    别名: 主站  标签: #vue        │    │
+│    #java     │   └─────────────────────────────────┘    │
+│              │                                          │
+│  💼 工作区   │                                          │
+│    工作区A   │                                          │
+│              │                                          │
+│  ─────────── │                                          │
+│  ⚙️ 设置     │                                          │
+│    IDE设置   │                                          │
+│  ┌──────────┐│                                         │
+│  │☀️浅色│🌙深色││                                         │
+│  └──────────┘│                                          │
+└──────────────┴──────────────────────────────────────────┘
+背景: #FFFFFF / 侧栏: #F8F9FA / 文字: #212529 / 主题色: #0078D4
+```
+
+**Dark 模式：**
+```
+┌─────────────────────────────────────────────────────────┐
+│  Project Hub                              [-] [□] [×]   │
+├──────────────┬──────────────────────────────────────────┤
+│              │                                          │
+│  📁 全部(24) │   🔍 搜索项目...  [快速启动][IDE设置][+] │
+│  ⭐ 收藏(5)  │  ──────────────────────────────────────  │
+│  🕐 最近(10) │                                          │
+│              │   ┌─────────────────────────────────┐    │
+│  🏷️ 标签     │   │ 🚀 电商平台重构    [用VS Code][⋮]│    │
+│    #web      │   │    别名: 主站  标签: #vue        │    │
+│    #java     │   └─────────────────────────────────┘    │
+│              │                                          │
+│  💼 工作区   │                                          │
+│    工作区A   │                                          │
+│              │                                          │
+│  ─────────── │                                          │
+│  ⚙️ 设置     │                                          │
+│    IDE设置   │                                          │
+│  ┌──────────┐│                                         │
+│  │☀️浅色│🌙深色││                                         │
+│  └──────────┘│                                          │
+└──────────────┴──────────────────────────────────────────┘
+背景: #1E1E2E / 侧栏: #2A2A3C / 文字: #E4E4E8 / 主题色: #60CDFF
+```
+
+## 主题切换设计
+
+### 切换位置
+
+主题切换控件放置在 **左侧导航栏底部「设置」分组内**，位于「IDE设置」下方。
+
+**选位理由：**
+
+| 候选位置 | 优点 | 缺点 | 推荐度 |
+|---|---|---|---|
+| 左侧导航栏底部「设置」区域 | 与IDE设置功能分区一致；固定位置不随内容滚动；符合VS Code等桌面应用惯例 | 需要滚动到底部 | ⭐⭐⭐⭐⭐ |
+| 顶部工具栏右侧 | 一目了然，操作方便 | 工具栏已比较拥挤 | ⭐⭐⭐ |
+| 标题栏区域 | 不占用内容空间 | Avalonia自定义标题栏实现较复杂 | ⭐⭐ |
+
+### 交互控件
+
+使用 **Segmented Toggle（分段切换器）** 作为主题切换控件：
+
+```
+┌─────────────────────┐
+│  ☀️ 浅色  │  🌙 深色  │    ← Segmented Toggle
+└─────────────────────┘
+```
+
+**Material Icon 映射：**
+- Light 模式 → `WeatherSunny`
+- Dark 模式 → `WeatherNight`
+
+### 主题切换按钮样式
+
+| 属性 | Light(选中) | Light(未选中) | Dark(选中) | Dark(未选中) |
+|---|---|---|---|---|
+| Background | #0078D4 | #E9ECEF | #60CDFF | #3E3E55 |
+| Foreground | #FFFFFF | #495057 | #003A5E | #808090 |
+| BorderBrush | #0078D4 | #DEE2E6 | #60CDFF | #4A4A62 |
+| CornerRadius | 左6右0 / 左0右6 | 左6右0 / 左0右6 | 左6右0 / 左0右6 | 左6右0 / 左0右6 |
+| Padding | 12,6 | 12,6 | 12,6 | 12,6 |
+
+### 交互细节
+
+| 属性 | 说明 |
+|---|---|
+| 控件类型 | Segmented Toggle（两段式切换器） |
+| 位置 | 左侧导航栏底部「设置」分组内，「IDE设置」下方 |
+| 默认值 | 跟随系统主题（RequestedThemeVariant="Default"） |
+| 持久化 | 用户选择保存到本地配置文件，下次启动时恢复 |
+| 切换效果 | 即时生效，无需重启应用 |
+| 动画 | 200ms 颜色过渡动画 |
+
+### 切换实现
+
+```csharp
+// 主题切换核心逻辑
+Application.Current.RequestedThemeVariant = ThemeVariant.Light;  // 浅色
+Application.Current.RequestedThemeVariant = ThemeVariant.Dark;   // 深色
+Application.Current.RequestedThemeVariant = ThemeVariant.Default; // 跟随系统
+```
+
+```xml
+<!-- 导航栏中的主题切换区域 -->
+<StackPanel Orientation="Horizontal" Spacing="0" Margin="8,4">
+    <Button Classes="ThemeSegmentButton"
+            IsEnabled="{Binding !IsDarkTheme}"
+            Command="{Binding SwitchToLightThemeCommand}">
+        <StackPanel Orientation="Horizontal" Spacing="4">
+            <icons:MaterialIcon Kind="WeatherSunny" Width="14" Height="14" />
+            <TextBlock Text="浅色" FontSize="12" />
+        </StackPanel>
+    </Button>
+    <Button Classes="ThemeSegmentButton"
+            IsEnabled="{Binding IsDarkTheme}"
+            Command="{Binding SwitchToDarkThemeCommand}">
+        <StackPanel Orientation="Horizontal" Spacing="4">
+            <icons:MaterialIcon Kind="WeatherNight" Width="14" Height="14" />
+            <TextBlock Text="深色" FontSize="12" />
+        </StackPanel>
+    </Button>
+</StackPanel>
+```
+
+### ThemeService 设计
+
+```csharp
+public class ThemeService
+{
+    private const string SettingsKey = "AppTheme";
+
+    public ThemeMode CurrentTheme { get; private set; } = ThemeMode.Default;
+
+    public void ApplyTheme(Application app, ThemeMode mode)
+    {
+        CurrentTheme = mode;
+        app.RequestedThemeVariant = mode switch
+        {
+            ThemeMode.Light   => ThemeVariant.Light,
+            ThemeMode.Dark    => ThemeVariant.Dark,
+            _                 => ThemeVariant.Default
+        };
+        SavePreference(mode);
+    }
+
+    public void LoadSavedTheme(Application app)
+    {
+        var saved = LoadPreference();
+        ApplyTheme(app, saved);
+    }
+
+    private void SavePreference(ThemeMode mode) { /* 持久化到本地配置 */ }
+    private ThemeMode LoadPreference() { /* 从本地配置读取 */ }
+}
+
+public enum ThemeMode { Light, Dark, Default }
+```

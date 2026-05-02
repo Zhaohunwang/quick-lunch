@@ -10,6 +10,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Avalonia;
 
 namespace ProjectHub.Desktop.ViewModels
 {
@@ -60,9 +61,9 @@ namespace ProjectHub.Desktop.ViewModels
         [ObservableProperty]
         private ObservableCollection<IdeTemplate> _availableIdes = new();
 
-        public string AllProjectsText => $"📁 全部({AllProjectsCount})";
-        public string FavoriteProjectsText => $"⭐ 收藏({FavoriteProjectsCount})";
-        public string RecentProjectsText => $"🕐 最近({RecentProjectsCount})";
+        public string AllProjectsText => $"全部({AllProjectsCount})";
+        public string FavoriteProjectsText => $"收藏({FavoriteProjectsCount})";
+        public string RecentProjectsText => $"最近({RecentProjectsCount})";
 
         [ObservableProperty]
         private bool _isAllSelected = true;
@@ -76,7 +77,39 @@ namespace ProjectHub.Desktop.ViewModels
         [ObservableProperty]
         private string _currentViewMode = "card"; // card, list, compact
 
+        [ObservableProperty]
+        private bool _isLightTheme = App.ThemeService.CurrentTheme == Services.ThemeMode.Light;
+
+        [ObservableProperty]
+        private bool _isDarkTheme = App.ThemeService.CurrentTheme == Services.ThemeMode.Dark;
+
         public bool HasMoreTags => Tags.Count > 6;
+
+        partial void OnIsLightThemeChanged(bool value)
+        {
+            if (value)
+            {
+                IsDarkTheme = false;
+                App.ThemeService.ApplyTheme(App.Current!, ThemeMode.Light);
+            }
+            else if (!IsDarkTheme)
+            {
+                App.ThemeService.ApplyTheme(App.Current!, ThemeMode.Default);
+            }
+        }
+
+        partial void OnIsDarkThemeChanged(bool value)
+        {
+            if (value)
+            {
+                IsLightTheme = false;
+                App.ThemeService.ApplyTheme(App.Current!, ThemeMode.Dark);
+            }
+            else if (!IsLightTheme)
+            {
+                App.ThemeService.ApplyTheme(App.Current!, ThemeMode.Default);
+            }
+        }
         
         [RelayCommand]
         private void ChangeViewMode(string mode)
@@ -470,6 +503,19 @@ namespace ProjectHub.Desktop.ViewModels
         private async Task LaunchProject(Project project)
         {
             await _ideLauncherService.LaunchProjectAsync(project);
+        }
+
+        [RelayCommand]
+        private async Task ToggleFavorite(Project project)
+        {
+            if (project == null) return;
+
+            project.IsFavorite = !project.IsFavorite;
+            await _projectService.UpdateProjectAsync(project);
+
+            FavoriteProjectsCount = Projects.Count(p => p.IsFavorite);
+            OnPropertyChanged(nameof(FavoriteProjectsText));
+            ApplyFilter();
         }
 
         [RelayCommand]

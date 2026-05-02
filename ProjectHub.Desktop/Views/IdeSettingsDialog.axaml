@@ -3,6 +3,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="clr-namespace:ProjectHub.Desktop.ViewModels"
+        xmlns:icons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
         mc:Ignorable="d" d:DesignWidth="700" d:DesignHeight="600"
         x:Class="ProjectHub.Desktop.Views.IdeSettingsDialog"
         Title="IDE设置"
@@ -22,7 +23,10 @@
 
         <!-- 标题栏 -->
         <StackPanel Grid.Row="0" Margin="0,0,0,20">
-            <TextBlock Text="⚙️ IDE设置" FontWeight="SemiBold" FontSize="20" />
+            <StackPanel Orientation="Horizontal" Spacing="8">
+                <icons:MaterialIcon Kind="Cog" Width="24" Height="24" VerticalAlignment="Center" />
+                <TextBlock Text="IDE设置" FontWeight="SemiBold" FontSize="20" VerticalAlignment="Center" />
+            </StackPanel>
             <TextBlock Text="配置和管理您的IDE" FontSize="12" Foreground="#6C757D" Margin="0,4,0,0" />
         </StackPanel>
 
@@ -50,7 +54,12 @@
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Column="0" Text="已安装的IDE" FontWeight="SemiBold" FontSize="14" />
-                        <Button Grid.Column="1" Content="🔍 自动检测" Classes="ToolButton" Command="{Binding DetectIdesCommand}" />
+                        <Button Grid.Column="1" Classes="ToolButton" Command="{Binding DetectIdesCommand}">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <icons:MaterialIcon Kind="Magnify" Width="14" Height="14" />
+                                <TextBlock Text="自动检测" FontSize="13" />
+                            </StackPanel>
+                        </Button>
                     </Grid>
 
                     <!-- 错误信息 -->
