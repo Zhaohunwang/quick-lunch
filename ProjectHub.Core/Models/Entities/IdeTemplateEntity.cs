@@ -1,6 +1,6 @@
-namespace ProjectHub.Core.Models;
+namespace ProjectHub.Core.Models.Entities;
 
-public class IdeTemplate
+public class IdeTemplateEntity
 {
     public long Id { get; set; }
 
@@ -12,7 +12,7 @@ public class IdeTemplate
 
     public string? Icon { get; set; }
 
-    public List<string> SupportedExtensions { get; set; } = new();
+    public string SupportedExtensionsJson { get; set; } = "[]";
 
     public int Priority { get; set; }
 }

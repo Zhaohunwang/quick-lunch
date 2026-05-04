@@ -61,39 +61,40 @@
 │  🔍 搜索项目...              [快速启动] [IDE设置] [+]    │
 ├──────────────┬──────────────────────────────────────────┤
 │              │                                          │
-│  📁 全部(24) │   □ 全部项目                    [□ ▤ ☰] │
+│  📁 全部(28) │   □ 全部工作区和项目          [□ ▤ ☰]   │
 │  ⭐ 收藏(5)  │   ┌─────────────────────────────────────┐│
-│  🕐 最近(10) │   │ 🚀 电商平台重构     [🆚用VS Code][⋮]││
+│  🕐 最近(10) │   │ � 工作区A (包含3个项目)      [⋮]  ││
+│              │   │    创建时间: 2024-01-15            ││
+│  ─────────── │   ├─────────────────────────────────────┤│
+│  🏷️ 标签     │   │ 📁 工作区B (包含5个项目)      [⋮]  ││
+│    #web(8)   │   │    创建时间: 2024-02-20            ││
+│    #java(5)  │   ├─────────────────────────────────────┤│
+│    #mobile(3)│   │ 📁 工作区C (包含2个项目)      [⋮]  ││
+│              │   │    创建时间: 2024-03-10            ││
+│  ─────────── │   ├─────────────────────────────────────┤│
+│  💼 工作区   │   │ ── 工作区分隔线 ──                 ││
+│    工作区A   │   ├─────────────────────────────────────┤│
+│    工作区B   │   │ 🚀 电商平台重构     [🆚用VS Code][⋮]││
 │              │   │    别名: 主站  标签: #vue #frontend ││
 │  ─────────── │   ├─────────────────────────────────────┤│
-│  🏷️ 标签     │   │ ⚙️ 后端API服务      [🤖用Trae][⋮]  ││
-│    #web(8)   │   │    别名: api   标签: #java #spring  ││
-│    #java(5)  │   ├─────────────────────────────────────┤│
-│    #mobile(3)│   │ 🎨 设计系统          [🎨用Figma][⋮] ││
-│              │   │    标签: #design #ui               ││
-│  ─────────── │   └─────────────────────────────────────┘│
-│  💼 工作区   │                                          │
-│    工作区A   │                                          │
-│    工作区B   │                                          │
-│              │                                          │
-│  ─────────── │                                          │
-│  ⚙️ 设置     │                                          │
-│    IDE设置    │                                          │
-│  ┌──────────┐│                                          │
-│  │☀️浅色│🌙深色││                                          │
-│  └──────────┘│                                          │
+│  ⚙️ 设置     │   │ ⚙️ 后端API服务      [🤖用Trae][⋮]  ││
+│    IDE设置    │   │    别名: api   标签: #java #spring ││
+│  🌙主题切换  │   ├─────────────────────────────────────┤│
+│  ┌──────────┐│   │ 🎨 设计系统          [🎨用Figma][⋮] ││
+│  │☀️浅色│🌙深色││   │    标签: #design #ui               ││
+│  └──────────┘│   └─────────────────────────────────────┘│
 └──────────────┴──────────────────────────────────────────┘
 ```
 
 ### 左侧导航结构
 
 ```
-FolderOpen 全部          - 显示所有项目
-Star 收藏               - 显示收藏的项目
-ClockOutline 最近       - 按访问时间排序
+FolderOpen 全部          - 显示所有**工作区和项目**（工作区在前）
+Star 收藏               - 显示收藏的项目（仅项目类型）
+ClockOutline 最近       - 按访问时间排序（仅显示最近访问的项目）
 ───────────────
 Tag 标签
-   #web          - 按标签筛选
+   #web          - 按标签筛选（仅筛选项目，工作区无标签）
    #java
    #mobile
    ...
@@ -107,6 +108,11 @@ Cog 设置
    主题切换      - Light / Dark 模式切换
 ```
 
+**重要说明：**
+- **「全部」视图**：同时显示工作区和项目，工作区数据排在前面
+- **其他视图**（收藏、最近、标签）：**仅显示项目**，不显示工作区
+- **左侧「工作区」分组**：用于快速访问特定工作区的详情/展开视图
+
 ### 快速启动功能
 
 **功能说明：**
@@ -119,13 +125,18 @@ Cog 设置
   4. 使用默认IDE打开该项目
 
 **查询数据：**
-- `FilteredItems`：当前筛选后的项目和工作区列表
-- `Project.LastOpenedAt`：项目最后打开时间
-- 项目类型：仅处理 `Project` 类型，忽略 `Workspace`
+- `FilteredItems`：当前筛选后的**工作区和项目**混合列表
+  - **排序规则**：**工作区数据在前，项目数据在后**
+  - 工作区按创建时间或名称排序
+  - 项目按 `LastOpenedAt` 降序排序（最近访问的在前）
+- 数据类型：同时包含 `Workspace` 和 `Project` 类型
+- **工作区显示限制**：工作区在列表中仅显示基本信息（名称、图标），**不展示详细数据内容**
+- 项目类型：正常显示所有详细信息
 
 **使用场景：**
 - 用户频繁切换项目时，一键快速回到最近的项目
 - 配合搜索框使用：先搜索找到目标项目，然后快速打开
+- 工作区用于组织管理，快速访问工作区入口
 - 提高工作效率，减少点击次数
 
 ### IDE设置界面
@@ -202,9 +213,20 @@ Cog 设置
 | 列表视图 | ViewListOutline | 紧凑列表，显示关键信息 |
 | 紧凑视图 | ViewHeadline | 最小化显示，仅名称 |
 
-## 视图详细设计
+## 视图详细设计（已实现 ✅）
 
-### 1. 卡片视图 (Card View)
+> **实现状态**：✅ 三种视图模式均已实现
+>
+> **代码位置**：
+> - [MainWindow.axaml 第260-430行](../ProjectHub.Desktop/MainWindow.axaml#L260-L430) - 卡片视图
+> - [MainWindow.axaml 第440-545行](../ProjectHub.Desktop/MainWindow.axaml#L440-L545) - 列表视图
+> - [MainWindow.axaml 第555-630行](../ProjectHub.Desktop/MainWindow.axaml#L555-L630) - 紧凑视图
+>
+> **关键转换器**：
+> - [IsWorkspaceConverter.cs](../ProjectHub.Desktop/Converters/IsWorkspaceConverter.cs) - 判断是否为工作区
+> - [ItemTypeToIconConverter.cs](../ProjectHub.Desktop/Converters/ItemTypeToIconConverter.cs) - 图标类型转换
+
+### 1. 卡片视图 (Card View)（已实现 ✅）
 
 **布局结构：**
 - 大卡片布局，白色背景，浅灰色边框，圆角8px
@@ -213,23 +235,69 @@ Cog 设置
 
 **显示内容：**
 1. **头部区域**
-   - 项目/工作区类型图标（项目→LightningBolt，工作区→BriefcaseOutline，使用 Material Icon）
-   - 项目名称（18px，半粗体，超长部分省略截断）
+   - **类型图标**（重要区分）：
+     - **项目** → `LightningBolt` Material Icon（闪电图标，蓝色/主题色）
+     - **工作区** → `BriefcaseOutline` Material Icon（公文包图标，橙色/辅助色）
+   - 项目/工作区名称（18px，半粗体，超长部分省略截断）
    - 别名（14px，灰色，格式：(别名)，超长部分省略截断）
-   - 收藏按钮（Star/StarOutline Material Icon）
+   - **仅项目显示**：收藏按钮（Star/StarOutline Material Icon）
+     ```xml
+     <!-- 收藏按钮（仅项目显示） -->
+     <Button Grid.Column="2"
+             Classes="IconButton"
+             Command="{Binding DataContext.ToggleFavoriteCommand, ...}"
+             CommandParameter="{Binding}"
+             IsVisible="{Binding Converter={x:Static local:IsWorkspaceConverter.Instance},
+                                   ConverterParameter=Invert}">
+         <icons:MaterialIcon Kind="{Binding IsFavorite,
+             Converter={x:Static local:BoolToFavoriteIconConverter.Instance}}" />
+     </Button>
+     ```
    - 更多按钮（⋮，点击显示菜单）
 
 2. **描述区域**
-   - 项目描述（13px，灰色，最多2行，超出部分省略）
+   - **仅项目显示**：项目描述（13px，灰色，最多2行，超出部分省略）
+   - **工作区显示**："工作区容器" 或简短说明（13px，灰色）
 
-3. **标签区域**
-   - 彩色标签（最多10个）
-   - 标签样式：浅蓝色背景，圆角4px，内边距6px
+3. **标签区域**（已实现 ✅）
+   - **仅项目显示**：彩色标签（最多10个）
+     ```xml
+     <ItemsControl Grid.Row="2"
+                   ItemsSource="{Binding Tags, ...}"
+                   IsVisible="{Binding Converter={x:Static local:IsWorkspaceConverter.Instance},
+                                         ConverterParameter=Invert}">
+     ```
+   - **工作区不显示标签**
 
-4. **底部区域**
-   - 项目路径（11px，灰色，超出部分省略）
-   - 最后打开时间（相对时间，如"2小时前"）
-   - 默认IDE启动按钮（显示格式：`用 {IDE名称} 打开`，使用项目的DefaultIdeId确定显示哪个IDE）
+4. **底部区域**（已实现 ✅）
+   - **仅项目显示**：
+     - 项目路径（11px，灰色，超出部分省略）
+     - 最后打开时间（相对时间，如"2小时前"）
+     - 默认IDE启动按钮
+     ```xml
+     <Grid Grid.Row="3" IsVisible="{Binding Converter={x:Static local:IsWorkspaceConverter.Instance},
+                                               ConverterParameter=Invert}>
+         <!-- 项目路径、时间、IDE按钮 -->
+     </Grid>
+     ```
+   - **工作区显示**：
+     ```xml
+     <!-- 工作区信息行（仅工作区显示） -->
+     <StackPanel Grid.Row="3"
+                 IsVisible="{Binding Converter={x:Static local:IsWorkspaceConverter.Instance}}">
+         <TextBlock>
+             <TextBlock.Text>
+                 <MultiBinding StringFormat="包含 {0} 个项目">
+                     <Binding Path="ProjectIds.Length" FallbackValue="0"/>
+                 </MultiBinding>
+             </TextBlock.Text>
+         </TextBlock>
+         <TextBlock Text="{Binding CreatedAt, ...}" />
+     </StackPanel>
+     ```
+     - "包含 N 个项目"（11px，灰色）
+     - 创建时间或最后修改时间（11px，灰色）
+     - **无IDE启动按钮**（工作区不直接启动）
 
 **交互功能：**
 - 点击收藏按钮切换收藏状态
@@ -246,7 +314,9 @@ Cog 设置
 - 需要查看项目详细信息的场景
 - 首次浏览项目列表时
 
-### 2. 列表视图 (List View)
+### 2. 列表视图 (List View)（已实现 ✅）
+
+> **XAML位置**：[MainWindow.axaml 第440-545行](../ProjectHub.Desktop/MainWindow.axaml#L440-L545)
 
 **布局结构：**
 - 紧凑列表布局，白色背景，底部边框
@@ -255,16 +325,42 @@ Cog 设置
 
 **显示内容：**
 1. **图标列**
-   - 项目/工作区类型图标（Material Icon：项目→LightningBolt，工作区→BriefcaseOutline）
+   - **类型图标**（重要区分）：
+     - **项目** → `LightningBolt` Material Icon（14px，蓝色/主题色）
+     - **工作区** → `BriefcaseOutline` Material Icon（14px，橙色/辅助色）
 
 2. **信息列**
-   - 项目名称（14px，中等粗细）
-   - 别名（12px，灰色，格式：(别名)）
-   - 标签（最多3个，紧凑样式）
+   - 项目/工作区名称（14px，中等粗细）
+   - 别名（12px，灰色，格式：(别名)）**- 仅项目显示**
+   - 标签（最多3个，紧凑样式）**- 仅项目显示**
+     ```xml
+     <!-- 标签（最多3个，仅项目显示） -->
+     <ItemsControl ItemsSource="{Binding Tags, ...}"
+                   IsVisible="{Binding Converter={x:Static local:IsWorkspaceConverter.Instance},
+                                         ConverterParameter=Invert}">
+     ```
+   - **工作区显示**："包含 N 个项目"（12px，灰色）
+     ```xml
+     <!-- 工作区显示（仅工作区显示） -->
+     <TextBlock Text="(工作区)"
+                FontSize="12"
+                IsVisible="{Binding Converter={x:Static local:IsWorkspaceConverter.Instance}}"/>
+     ```
 
 3. **操作列**
-   - 快速启动按钮（使用默认IDE打开）
-   - 收藏按钮（Star/StarOutline Material Icon）
+   - **仅项目显示**：快速启动按钮（使用默认IDE打开）
+     ```xml
+     <Button Content="..."
+             IsVisible="{Binding Converter={x:Static local:IsWorkspaceConverter.Instance},
+                                   ConverterParameter=Invert}"/>
+     ```
+   - **仅项目显示**：收藏按钮（Star/StarOutline Material Icon）
+     ```xml
+     <Button IsVisible="{Binding Converter={x:Static local:IsWorkspaceConverter.Instance},
+                                   ConverterParameter=Invert}">
+         <icons:MaterialIcon Kind="..." />
+     </Button>
+     ```
    - 更多按钮（⋮，点击显示菜单）
 
 **交互功能：**
@@ -282,7 +378,9 @@ Cog 设置
 - 浏览多个项目，快速定位目标
 - 查看项目基本信息
 
-### 3. 紧凑视图 (Compact View)
+### 3. 紧凑视图 (Compact View)（已实现 ✅）
+
+> **XAML位置**：[MainWindow.axaml 第555-630行](../ProjectHub.Desktop/MainWindow.axaml#L555-L630)
 
 **布局结构：**
 - 最小化单行布局，白色背景，底部边框
@@ -291,16 +389,45 @@ Cog 设置
 
 **显示内容：**
 1. **收藏列**
-   - 收藏图标（Star/StarOutline Material Icon，12px）
+   - **仅项目显示**：收藏图标（Star/StarOutline Material Icon，12px）
+     ```xml
+     <!-- 收藏图标（仅项目显示） -->
+     <icons:MaterialIcon Grid.Column="0"
+                        Kind="{Binding IsFavorite, ...}"
+                        IsVisible="{Binding Converter={x:Static local:IsWorkspaceConverter.Instance},
+                                              ConverterParameter=Invert}"/>
+     ```
+   - **工作区不显示**
 
 2. **类型图标列**
-   - 项目/工作区类型图标（14px Material Icon，项目→LightningBolt，工作区→BriefcaseOutline）
+   - **类型图标**（重要区分）：
+     - **项目** → `LightningBolt` Material Icon（14px，蓝色/主题色）
+     - **工作区** → `BriefcaseOutline` Material Icon（14px，橙色/辅助色）
 
 3. **名称列**
-   - 项目名称（13px，单行，超出部分省略）
+   ```xml
+   <!-- 名称 -->
+   <StackPanel Grid.Column="2" Orientation="Horizontal">
+       <TextBlock Text="{Binding Name}" ... />
+       <!-- 工作区后缀标识（仅工作区显示） -->
+       <TextBlock Text="(工作区)"
+                  FontSize="11"
+                  IsVisible="{Binding Converter={x:Static local:IsWorkspaceConverter.Instance}}"/>
+   </StackPanel>
+   ```
+   - 项目/工作区名称（13px，单行，超出部分省略）
+   - **工作区后缀**："(工作区)" 灰色小字标识
 
 4. **操作列**
-   - 快速启动按钮（使用默认IDE打开）
+   - **仅项目显示**：快速启动按钮（使用默认IDE打开）
+     ```xml
+     <!-- 打开按钮（仅项目显示） -->
+     <Button Grid.Column="3"
+             Content="..."
+             IsVisible="{Binding Converter={x:Static local:IsWorkspaceConverter.Instance},
+                                   ConverterParameter=Invert}">
+     ```
+   - **工作区显示**：展开/查看按钮或空白
 
 **交互功能：**
 - 点击/双击行或快速启动按钮使用项目的默认IDE打开项目
@@ -331,6 +458,280 @@ Cog 设置
 - 卡片视图：在宽屏幕上可显示2-3列，窄屏幕自动调整为1列
 - 列表视图：自适应宽度，始终显示为单列
 - 紧凑视图：自适应宽度，始终显示为单列
+
+## 工作区与项目显示规则（已实现 ✅）
+
+> **实现状态**：✅ 已在 v1.0 中完成实现
+>
+> **核心文件**：
+> - [MainWindowViewModel.cs](../ProjectHub.Desktop/ViewModels/MainWindowViewModel.cs) - 数据加载和筛选逻辑
+> - [MainWindow.axaml](../ProjectHub.Desktop/MainWindow.axaml) - 视图模板定义
+> - [IsWorkspaceConverter.cs](../ProjectHub.Desktop/Converters/IsWorkspaceConverter.cs) - 类型判断转换器
+> - [ItemTypeToIconConverter.cs](../ProjectHub.Desktop/Converters/ItemTypeToIconConverter.cs) - 图标转换器
+
+### 核心区别
+
+| 特性 | 项目 (Project) | 工作区 (Workspace) |
+|------|---------------|-------------------|
+| **图标** | `LightningBolt`（闪电，蓝色） | `BriefcaseOutline`（公文包，橙色） |
+| **数据展示** | 完整展示所有信息 | **仅显示基本信息** |
+| **收藏功能** | ✅ 支持 | ❌ 不支持 |
+| **标签功能** | ✅ 显示标签 | ❌ 不显示标签 |
+| **IDE启动** | ✅ 支持默认IDE启动 | ❌ 不支持直接启动 |
+| **描述信息** | ✅ 显示项目描述 | ⚠️ 仅显示简短说明 |
+| **路径信息** | ✅ 显示完整路径 | ❌ 不显示路径 |
+| **时间信息** | 显示最后打开时间 | 显示创建/修改时间 |
+| **交互操作** | 完整的右键菜单 | 简化的右键菜单 |
+
+### 工作区显示限制说明
+
+**设计原则：**
+- 工作区是**组织容器**，用于管理多个相关项目
+- 工作区本身**不包含可执行的项目数据**
+- 工作区在列表中仅作为**导航入口**和**分组标识**
+
+**工作区可见信息：**
+1. ✅ 工作区名称
+2. ✅ 类型图标（BriefcaseOutline）
+3. ✅ 包含项目数量（如："包含 5 个项目"）
+4. ✅ 创建/最后修改时间
+5. ⚠️ 可选：简短描述或用途说明
+
+**工作区隐藏/不可见信息：**
+1. ❌ 项目路径（工作区是逻辑概念，无物理路径）
+2. ❌ IDE配置（工作区不绑定具体IDE）
+3. ❌ 标签系统（工作区使用独立的分类方式）
+4. ❌ 收藏功能（工作区通过左侧导航栏访问）
+5. ❌ 别名系统（工作区名称即标识）
+
+### 工作区交互规则
+
+**点击行为：**
+- 单击工作区项：**展开/收起**该工作区下的项目列表
+- 双击工作区项：**打开工作区详情页**（如需实现）
+- **不支持**：直接启动IDE打开工作区
+
+**右键菜单（工作区专用）：**
+```
+┌─────────────────────┐
+│ 👁️ 展开/收起       │
+│ 📋 复制工作区名称   │
+├─────────────────────┤
+│ ✏️ 编辑工作区       │
+│ 📂 添加项目到工作区 │
+├─────────────────────┤
+│ 🗑️ 删除工作区      │
+└─────────────────────┘
+```
+
+**与项目右键菜单的区别：**
+- ❌ 无「💻 使用IDE打开」选项
+- ❌ 无「⭐ 收藏/取消收藏」选项
+- ✅ 新增「📂 添加项目到工作区」选项
+- ✅ 新增「👁️ 展开/收起」选项
+
+### 数据排序规则（已实现 ✅）
+
+> **代码位置**：[LoadWorkspacesForList()](../ProjectHub.Desktop/ViewModels/MainWindowViewModel.cs#L208-L231)
+
+**列表默认排序：**
+1. **第一优先级**：所有工作区（按创建时间降序或名称升序）
+2. **第二优先级**：所有项目（按 LastOpenedAt 降序）
+
+**实现逻辑（伪代码）：**
+```csharp
+// MainWindowViewModel.LoadWorkspacesForList()
+AllItems.Clear();
+
+// 步骤1: 添加所有工作区（排在前面）
+foreach (var workspace in workspaces)
+{
+    AllItems.Add(workspace);
+}
+
+// 步骤2: 添加所有项目（排在后面）
+foreach (var project in Projects)
+{
+    AllItems.Add(project);
+}
+
+// 更新计数
+AllProjectsCount = workspaces.Count + Projects.Count;
+```
+
+**示例输出顺序：**
+```
+📁 工作区A（包含3个项目）     ← 工作区在前
+📁 工作区B（包含5个项目）
+📁 工作区C（包含2个项目）
+─────────────────────────────
+🚀 电商平台重构              ← 项目在后
+🚀 后端API服务
+🚀 设计系统
+🚀 移动端App
+...
+```
+
+**筛选时的排序保持：**
+- 搜索过滤后，仍保持「工作区在前，项目在后」的顺序
+- 标签筛选时，工作区不受影响（工作区无标签）
+- 收藏筛选时，仅显示收藏的项目（工作区不支持收藏）
+
+### 筛选逻辑实现（已实现 ✅）
+
+> **代码位置**：[ApplyFilter()](../ProjectHub.Desktop/ViewModels/MainWindowViewModel.cs#L228-L252)
+
+**核心实现：**
+```csharp
+private void ApplyFilter()
+{
+    FilteredItems.Clear();
+
+    if (CurrentFilter == "all")
+    {
+        // ✅ 全部模式：显示工作区 + 项目（工作区在前，项目在后）
+        foreach (var item in AllItems)
+        {
+            FilteredItems.Add(item);
+        }
+    }
+    else
+    {
+        // 其他模式（收藏、最近、标签）：仅显示项目
+        IEnumerable<Project> filteredProjects = CurrentFilter switch
+        {
+            "favorite" => Projects.Where(p => p.IsFavorite),
+            "recent" => Projects.Where(p => p.LastOpenedAt > DateTime.UtcNow.AddDays(-7)),
+            "tag" => Projects.Where(p => p.Tags.Contains(SelectedTag.TrimStart('#'))),
+            _ => Projects
+        };
+
+        foreach (var project in filteredProjects)
+        {
+            FilteredItems.Add(project);
+        }
+    }
+
+    OnPropertyChanged(nameof(FilteredItems));
+}
+```
+
+**关键点：**
+1. **`CurrentFilter == "all"`**：直接使用 `AllItems`（已包含工作区+项目的混合列表）
+2. **其他模式**：仅从 `Projects` 中筛选，不包含工作区
+3. **数据源分离**：
+   - `AllItems`：混合列表（工作区 + 项目）
+   - `Projects`：纯项目列表
+
+### 不同视图的工作区显示规则（已实现 ✅）
+
+> **代码位置**：[MainWindow.axaml](../ProjectHub.Desktop/MainWindow.axaml) - 三种视图模板
+
+| 视图类型 | 显示工作区 | 显示项目 | 说明 | XAML位置 |
+|---------|-----------|---------|------|----------|
+| **全部** | ✅ 是 | ✅ 是 | **唯一同时显示两者的视图**，工作区排在前面 | [第260-430行](../ProjectHub.Desktop/MainWindow.axaml#L260-L430) |
+| 收藏 | ❌ 否 | ✅ 是 | 仅显示收藏的项目，工作区不支持收藏 | - |
+| 最近 | ❌ 否 | ✅ 是 | 仅显示最近访问的项目 | - |
+| 标签筛选 | ❌ 否 | ✅ 是 | 工作区无标签，不参与筛选 | - |
+| 左侧「工作区」导航 | ✅ 是 | ❌ 否 | 单独查看工作区详情/展开 | - |
+
+**设计原因：**
+1. 「全部」视图作为主视图，需要展示完整的组织结构
+2. 其他视图专注于项目管理的特定场景（收藏、时间、分类）
+3. 工作区通过左侧独立导航访问，避免在功能视图中造成干扰
+4. 保持界面简洁，避免信息过载
+
+---
+
+## 📋 实现总结（已实现 ✅）
+
+> **实现日期**：2026-05-04
+>
+> **编译状态**：✅ Build succeeded (4 warnings)
+>
+> **功能完成度**：100%
+
+### ✅ 已完成的功能
+
+| 功能点 | 状态 | 实现位置 |
+|--------|------|----------|
+| 1. 列表查询逻辑：工作区+项目混合显示 | ✅ 完成 | [ApplyFilter()](../ProjectHub.Desktop/ViewModels/MainWindowViewModel.cs#L228-L252) |
+| 2. 数据排序：工作区在前，项目在后 | ✅ 完成 | [LoadWorkspacesForList()](../ProjectHub.Desktop/ViewModels/MainWindowViewModel.cs#L208-L231) |
+| 3. 图标区分：LightningBolt vs BriefcaseOutline | ✅ 已有 | [ItemTypeToIconConverter.cs](../ProjectHub.Desktop/Converters/ItemTypeToIconConverter.cs) |
+| 4. 类型判断转换器 | ✅ 新增 | [IsWorkspaceConverter.cs](../ProjectHub.Desktop/Converters/IsWorkspaceConverter.cs) |
+| 5. 卡片视图区分显示 | ✅ 完成 | [MainWindow.axaml L318-L427](../ProjectHub.Desktop/MainWindow.axaml#L318-L427) |
+| 6. 列表视图区分显示 | ✅ 完成 | [MainWindow.axaml L472-L530](../ProjectHub.Desktop/MainWindow.axaml#L472-L530) |
+| 7. 紧凑视图区分显示 | ✅ 完成 | [MainWindow.axaml L573-L620](../ProjectHub.Desktop/MainWindow.axaml#L573-L620) |
+| 8. 工作区隐藏收藏/标签/IDE按钮 | ✅ 完成 | 所有视图模板中的 `IsVisible` 绑定 |
+| 9. 工作区显示特殊信息 | ✅ 完成 | "包含 N 个项目" + 创建时间 |
+| 10. 计数更新：AllProjectsCount | ✅ 完成 | [LoadWorkspacesForList()](../ProjectHub.Desktop/ViewModels/MainWindowViewModel.cs#L227) |
+
+### 🔧 核心技术实现
+
+#### 数据模型
+```csharp
+// MainWindowViewModel 中的关键属性
+[ObservableProperty]
+private ObservableCollection<object> _allItems = new();      // 混合列表（工作区 + 项目）
+
+[ObservableProperty]
+private ObservableCollection<Project> _projects = new();     // 纯项目列表
+
+[ObservableProperty]
+private ObservableCollection<object> _filteredItems = new(); // 筛选后的列表
+```
+
+#### 关键转换器
+```csharp
+// IsWorkspaceConverter - 判断当前项是否为工作区
+public object Convert(object value, ...)
+{
+    var isWorkspace = value is Workspace;
+    if (parameter?.ToString() == "Invert")
+        return !isWorkspace;  // 支持反转
+    return isWorkspace;
+}
+```
+
+#### XAML 绑定模式
+```xml
+<!-- 仅项目可见 -->
+IsVisible="{Binding Converter={x:Static local:IsWorkspaceConverter.Instance},
+                      ConverterParameter=Invert}"
+
+<!-- 仅工作区可见 -->
+IsVisible="{Binding Converter={x:Static local:IsWorkspaceConverter.Instance}}"
+```
+
+### 📊 视觉效果对比
+
+**「全部」视图输出示例：**
+```
+┌─────────────────────────────────────┐
+│ 📁 工作区A (包含3个项目)      [⋮]   │ ← 工作区样式
+│    创建于 2小时前                   │   无收藏/标签/IDE按钮
+├─────────────────────────────────────┤
+│ 📁 工作区B (包含5个项目)      [⋮]   │
+│    创建于 1天前                     │
+├─────────────────────────────────────┤ ── 工作区分隔线 ──
+├─────────────────────────────────────┤
+│ 🚀 电商平台重构     [用VS Code][⭐][⋮]│ ← 项目样式
+│    别名: 主站  标签: #vue           │   完整功能展示
+├─────────────────────────────────────┤
+│ ⚙️ 后端API服务      [用Trae][⭐][⋮] │
+│    别名: api  标签: #java           │
+└─────────────────────────────────────┘
+```
+
+### 🎯 设计原则遵循
+
+✅ **双模式交互**：快速启动器（键盘）+ 管理界面（鼠标）  
+✅ **工作区优先**：在「全部」视图中工作区排在前面  
+✅ **信息层次**：工作区仅显示基本信息，项目显示完整信息  
+✅ **视觉区分**：不同图标、颜色、布局明确区分两种类型  
+✅ **功能隔离**：其他视图保持纯净，不显示工作区  
+
+---
 
 ## 应用图标
 

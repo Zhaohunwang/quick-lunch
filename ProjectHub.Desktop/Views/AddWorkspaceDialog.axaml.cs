@@ -1,5 +1,6 @@
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using Microsoft.Extensions.DependencyInjection;
 using ProjectHub.Core.Models;
 using ProjectHub.Desktop.ViewModels;
 
@@ -10,7 +11,7 @@ namespace ProjectHub.Desktop.Views
         public AddWorkspaceDialog()
         {
             InitializeComponent();
-            var viewModel = new AddWorkspaceDialogViewModel();
+            var viewModel = App.Services.GetRequiredService<AddWorkspaceDialogViewModel>();
             viewModel.CloseRequested += (sender, result) => Close(result);
             DataContext = viewModel;
         }

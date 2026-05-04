@@ -121,10 +121,12 @@ namespace ProjectHub.Desktop.ViewModels
             return true;
         }
 
-        public AddProjectDialogViewModel()
+        public AddProjectDialogViewModel() : this(new ProjectService(), new IdeLauncherService()) { }
+
+        public AddProjectDialogViewModel(IProjectService projectService, IIdeLauncherService ideLauncherService)
         {
-            _projectService = new ProjectService();
-            _ideLauncherService = new IdeLauncherService();
+            _projectService = projectService;
+            _ideLauncherService = ideLauncherService;
             _ = LoadAvailableTags();
             LoadAvailableIdes();
         }

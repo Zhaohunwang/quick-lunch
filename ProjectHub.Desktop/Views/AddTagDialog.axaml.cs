@@ -1,8 +1,8 @@
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using Microsoft.Extensions.DependencyInjection;
 using ProjectHub.Desktop.ViewModels;
 using System;
-using System.Linq;
 
 namespace ProjectHub.Desktop.Views
 {
@@ -11,7 +11,7 @@ namespace ProjectHub.Desktop.Views
         public AddTagDialog()
         {
             InitializeComponent();
-            var viewModel = new AddTagDialogViewModel();
+            var viewModel = App.Services.GetRequiredService<AddTagDialogViewModel>();
             viewModel.CloseRequested += (sender, result) => Close(result);
             DataContext = viewModel;
         }

@@ -11,9 +11,9 @@
         MaxWidth="700" MaxHeight="800"
         WindowStartupLocation="CenterOwner"
         CanResize="True">
-    <Window.DataContext>
+    <Design.DataContext>
         <vm:AddProjectDialogViewModel />
-    </Window.DataContext>
+    </Design.DataContext>
     
     <Grid Margin="20">
         <Grid.RowDefinitions>

@@ -2,6 +2,7 @@ using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Interactivity;
 using Avalonia.Threading;
+using Microsoft.Extensions.DependencyInjection;
 using ProjectHub.Core.Models;
 using ProjectHub.Desktop.ViewModels;
 using System.ComponentModel;
@@ -18,9 +19,9 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
-        
+        DataContext = App.Services.GetRequiredService<MainWindowViewModel>();
+
         Loaded += OnLoaded;
-        
         DataContextChanged += OnDataContextChanged;
     }
     
@@ -139,8 +140,8 @@ public partial class MainWindow : Window
             {
                 var capturedIde = ide;
                 var isDefault = defaultIde?.Id == ide.Id;
-                var ideSubItem = new MenuItem 
-                { 
+                var ideSubItem = new MenuItem
+                {
                     Header = $"{ide.Icon ?? "💻"} {(isDefault ? "✓ " : "")}{ide.Name}"
                 };
                 ideSubItem.Click += async (s, args) =>
@@ -157,5 +158,27 @@ public partial class MainWindow : Window
 
         contextMenu.Items.Insert(0, ideMenuItem);
         contextMenu.Items.Insert(1, new Separator());
+    }
+
+    private async void OnEditWorkspaceClick(object? sender, RoutedEventArgs e)
+    {
+        if (sender is MenuItem menuItem && menuItem.Tag is Workspace workspace)
+        {
+            if (DataContext is MainWindowViewModel viewModel)
+            {
+                await viewModel.EditWorkspaceCommand.ExecuteAsync(workspace);
+            }
+        }
+    }
+
+    private async void OnDeleteWorkspaceClick(object? sender, RoutedEventArgs e)
+    {
+        if (sender is MenuItem menuItem && menuItem.Tag is Workspace workspace)
+        {
+            if (DataContext is MainWindowViewModel viewModel)
+            {
+                await viewModel.DeleteWorkspaceCommand.ExecuteAsync(workspace);
+            }
+        }
     }
 }

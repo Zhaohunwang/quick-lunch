@@ -10,9 +10,9 @@
         Width="700" Height="600"
         MinWidth="600" MinHeight="500"
         WindowStartupLocation="CenterOwner">
-    <Window.DataContext>
+    <Design.DataContext>
         <vm:IdeSettingsDialogViewModel />
-    </Window.DataContext>
+    </Design.DataContext>
 
     <Grid Margin="20">
         <Grid.RowDefinitions>

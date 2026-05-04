@@ -38,11 +38,7 @@ namespace ProjectHub.Desktop.ViewModels
 
         public string DialogTitle => IsEditMode ? "编辑工作区" : "添加工作区";
 
-        public AddWorkspaceDialogViewModel()
-        {
-            _projectService = new ProjectService();
-            _workspaceService = new WorkspaceService(_projectService);
-        }
+        public AddWorkspaceDialogViewModel() : this(new WorkspaceService(), new ProjectService()) { }
 
         public AddWorkspaceDialogViewModel(IWorkspaceService workspaceService, IProjectService projectService)
         {

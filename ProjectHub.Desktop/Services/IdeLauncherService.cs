@@ -1,104 +1,181 @@
-using Microsoft.EntityFrameworkCore;
-using ProjectHub.Core.Database;
-using ProjectHub.Core.Models;
-using ProjectHub.Core.Services;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Text;
+using System.Runtime.InteropServices;
+using System.Text.Json;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using ProjectHub.Core.Database;
+using ProjectHub.Core.Models;
+using ProjectHub.Core.Models.Entities;
+using ProjectHub.Core.Services;
 
-namespace ProjectHub.Desktop.Services
+namespace ProjectHub.Desktop.Services;
+
+public class IdeLauncherService : IIdeLauncherService
 {
-    public class IdeLauncherService : IIdeLauncherService
+    private readonly Func<AppDbContext> _contextFactory;
+    private readonly List<IdeTemplate> _templates = new();
+
+    public IdeLauncherService() : this(() => new AppDbContext()) { }
+
+    public IdeLauncherService(Func<AppDbContext> contextFactory)
     {
-        private readonly AppDbContext _dbContext;
+        _contextFactory = contextFactory;
+        InitializeDefaultTemplates();
+    }
 
-        public IdeLauncherService()
+    public async Task<List<IdeTemplate>> GetAvailableIdesAsync()
+    {
+        using var db = _contextFactory();
+        var entities = await db.IdeTemplates.ToListAsync();
+        return entities.Select(e => e.ToDomain()).ToList();
+    }
+
+    public async Task LaunchProjectAsync(Project project, string? ideName = null)
+    {
+        var templates = await GetAvailableIdesAsync();
+        var template = ideName != null
+            ? templates.FirstOrDefault(t => t.Name == ideName)
+            : templates.FirstOrDefault();
+
+        if (template == null) return;
+
+        await LaunchProcessAsync(template.ExecutablePath, template.DefaultArgs, project.Path);
+
+        using var db = _contextFactory();
+        var entity = await db.Projects.FindAsync(project.Id);
+        if (entity != null)
         {
-            _dbContext = new AppDbContext();
-            _dbContext.Database.EnsureCreated();
+            entity.LastOpenedAt = DateTime.UtcNow;
+            entity.OpenCount++;
+            await db.SaveChangesAsync();
         }
+    }
 
-        public async Task LaunchProjectAsync(Project project, string? ideName = null)
+    public async Task LaunchProjectWithTemplateAsync(Project project, IdeTemplate ideTemplate)
+    {
+        await LaunchProcessAsync(ideTemplate.ExecutablePath, ideTemplate.DefaultArgs, project.Path);
+
+        using var db = _contextFactory();
+        var entity = await db.Projects.FindAsync(project.Id);
+        if (entity != null)
         {
-            IdeConfiguration? ideConfig = null;
-
-            if (!string.IsNullOrEmpty(ideName))
-            {
-                ideConfig = project.IdeConfigurations.FirstOrDefault(ic => ic.Name == ideName);
-            }
-            else if (project.DefaultIdeId.HasValue)
-            {
-                ideConfig = project.IdeConfigurations.FirstOrDefault(ic => ic.Id == project.DefaultIdeId.Value);
-            }
-            else if (project.IdeConfigurations.Count > 0)
-            {
-                ideConfig = project.IdeConfigurations.FirstOrDefault(ic => ic.IsDefault) ?? project.IdeConfigurations.First();
-            }
-
-            if (ideConfig != null)
-            {
-                var processStartInfo = new ProcessStartInfo
-                {
-                    FileName = ideConfig.ExecutablePath,
-                    Arguments = $"{(string.IsNullOrEmpty(ideConfig.CommandArgs) ? string.Empty : ideConfig.CommandArgs)} \"{project.Path}\"",
-                    UseShellExecute = true
-                };
-
-                Process.Start(processStartInfo);
-
-                // 更新项目的访问时间和次数
-                project.LastOpenedAt = DateTime.UtcNow;
-                project.OpenCount++;
-                _dbContext.Projects.Update(project);
-                await _dbContext.SaveChangesAsync();
-            }
+            entity.LastOpenedAt = DateTime.UtcNow;
+            entity.OpenCount++;
+            await db.SaveChangesAsync();
         }
+    }
 
-        public async Task LaunchProjectWithTemplateAsync(Project project, IdeTemplate ideTemplate)
+    public async Task AddIdeTemplateAsync(IdeTemplate template)
+    {
+        using var db = _contextFactory();
+        var entity = template.ToEntity();
+        db.IdeTemplates.Add(entity);
+        await db.SaveChangesAsync();
+        template.Id = entity.Id;
+    }
+
+    public async Task UpdateIdeTemplateAsync(IdeTemplate template)
+    {
+        using var db = _contextFactory();
+        var existingEntity = await db.IdeTemplates.FindAsync(template.Id);
+        if (existingEntity == null)
+            throw new InvalidOperationException($"IDE Template with Id '{template.Id}' not found");
+
+        existingEntity.Name = template.Name;
+        existingEntity.ExecutablePath = template.ExecutablePath;
+        existingEntity.DefaultArgs = template.DefaultArgs;
+        existingEntity.Icon = template.Icon;
+        existingEntity.Priority = template.Priority;
+        existingEntity.SupportedExtensionsJson = System.Text.Json.JsonSerializer.Serialize(template.SupportedExtensions);
+        await db.SaveChangesAsync();
+    }
+
+    public async Task DeleteIdeTemplateAsync(long id)
+    {
+        using var db = _contextFactory();
+        var entity = await db.IdeTemplates.FindAsync(id);
+        if (entity != null)
         {
-            var processStartInfo = new ProcessStartInfo
+            db.IdeTemplates.Remove(entity);
+            await db.SaveChangesAsync();
+        }
+    }
+
+    private async Task LaunchProcessAsync(string executablePath, string? args, string? workingDirectory = null)
+    {
+        try
+        {
+            var processInfo = new ProcessStartInfo
             {
-                FileName = ideTemplate.ExecutablePath,
-                Arguments = $"{(string.IsNullOrEmpty(ideTemplate.DefaultArgs) ? string.Empty : ideTemplate.DefaultArgs)} \"{project.Path}\"",
+                FileName = executablePath,
+                Arguments = args ?? string.Empty,
+                WorkingDirectory = workingDirectory ?? string.Empty,
                 UseShellExecute = true
             };
 
-            Process.Start(processStartInfo);
-
-            project.LastOpenedAt = DateTime.UtcNow;
-            project.OpenCount++;
-            _dbContext.Projects.Update(project);
-            await _dbContext.SaveChangesAsync();
-        }
-
-        public async Task<List<IdeTemplate>> GetAvailableIdesAsync()
-        {
-            return await Task.FromResult(_dbContext.IdeTemplates.ToList());
-        }
-
-        public async Task AddIdeTemplateAsync(IdeTemplate template)
-        {
-            _dbContext.IdeTemplates.Add(template);
-            await _dbContext.SaveChangesAsync();
-        }
-
-        public async Task UpdateIdeTemplateAsync(IdeTemplate template)
-        {
-            _dbContext.IdeTemplates.Update(template);
-            await _dbContext.SaveChangesAsync();
-        }
-
-        public async Task DeleteIdeTemplateAsync(Guid id)
-        {
-            var template = _dbContext.IdeTemplates.FirstOrDefault(t => t.Id == id);
-            if (template != null)
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                _dbContext.IdeTemplates.Remove(template);
-                await _dbContext.SaveChangesAsync();
+                var gioCmd = $"\"{executablePath}\" \"{workingDirectory}\"";
+                processInfo = new ProcessStartInfo
+                {
+                    FileName = "gio",
+                    Arguments = $"open \"{workingDirectory}\"",
+                    UseShellExecute = false
+                };
             }
+
+            await Task.Run(() => Process.Start(processInfo));
         }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Failed to launch IDE: {ex.Message}");
+            throw;
+        }
+    }
+
+    private void InitializeDefaultTemplates()
+    {
+        _templates.AddRange(new[]
+        {
+            new IdeTemplate
+            {
+                Id = 1,
+                Name = "VS Code",
+                ExecutablePath = "code",
+                DefaultArgs = "",
+                SupportedExtensions = new List<string> { "js", "ts", "py", "csharp", "json" },
+                Priority = 1
+            },
+            new IdeTemplate
+            {
+                Id = 2,
+                Name = "Visual Studio",
+                ExecutablePath = "devenv",
+                DefaultArgs = "",
+                SupportedExtensions = new List<string> { "sln", "csproj", "cs" },
+                Priority = 2
+            },
+            new IdeTemplate
+            {
+                Id = 3,
+                Name = "Rider",
+                ExecutablePath = "rider",
+                DefaultArgs = "",
+                SupportedExtensions = new List<string> { "sln", "csproj", "kt", "java" },
+                Priority = 3
+            },
+            new IdeTemplate
+            {
+                Id = 4,
+                Name = "IntelliJ IDEA",
+                ExecutablePath = "idea",
+                DefaultArgs = "",
+                SupportedExtensions = new List<string> { "java", "kt", "xml" },
+                Priority = 4
+            }
+        });
     }
 }

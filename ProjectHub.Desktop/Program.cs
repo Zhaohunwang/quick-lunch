@@ -1,18 +1,32 @@
 using Avalonia;
+using ProjectHub.Desktop.Services;
 using System;
 
 namespace ProjectHub.Desktop;
 
 class Program
 {
-    // Initialization code. Don't use any Avalonia, third-party APIs or any
-    // SynchronizationContext-reliant code before AppMain is called: things aren't initialized
-    // yet and stuff might break.
     [STAThread]
-    public static void Main(string[] args) => BuildAvaloniaApp()
-        .StartWithClassicDesktopLifetime(args);
+    public static void Main(string[] args)
+    {
+        GlobalExceptionHandler.Initialize();
+        FileLogger.Info("Application starting");
 
-    // Avalonia configuration, don't remove; also used by visual designer.
+        try
+        {
+            BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
+        }
+        catch (Exception ex)
+        {
+            FileLogger.Error("Fatal startup exception", ex);
+            throw;
+        }
+        finally
+        {
+            FileLogger.Info("Application shutting down");
+        }
+    }
+
     public static AppBuilder BuildAvaloniaApp()
         => AppBuilder.Configure<App>()
             .UsePlatformDetect()

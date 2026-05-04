@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using ProjectHub.Core.Models;
+using ProjectHub.Core.Services;
 using ProjectHub.Desktop.Services;
 using System;
 using System.Collections.ObjectModel;
@@ -12,7 +13,7 @@ namespace ProjectHub.Desktop.ViewModels
     public partial class IdeSettingsDialogViewModel : ObservableObject
     {
         private readonly IdeDetectionService _detectionService;
-        private readonly IdeLauncherService _launcherService;
+        private readonly IIdeLauncherService _launcherService;
 
         [ObservableProperty]
         private ObservableCollection<IdeTemplate> _availableIdes = new();
@@ -32,10 +33,12 @@ namespace ProjectHub.Desktop.ViewModels
         [ObservableProperty]
         private string _errorMessage = string.Empty;
 
-        public IdeSettingsDialogViewModel()
+        public IdeSettingsDialogViewModel() : this(new IdeDetectionService(), new IdeLauncherService()) { }
+
+        public IdeSettingsDialogViewModel(IdeDetectionService detectionService, IIdeLauncherService launcherService)
         {
-            _detectionService = new IdeDetectionService();
-            _launcherService = new IdeLauncherService();
+            _detectionService = detectionService;
+            _launcherService = launcherService;
             _ = LoadIdesAsync();
         }
 

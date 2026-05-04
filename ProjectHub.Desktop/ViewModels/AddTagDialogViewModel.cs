@@ -40,10 +40,7 @@ namespace ProjectHub.Desktop.ViewModels
 
         public string DialogTitle => IsEditMode ? "编辑标签" : "添加标签";
 
-        public AddTagDialogViewModel()
-        {
-            _tagService = new TagService();
-        }
+        public AddTagDialogViewModel() : this(new TagService()) { }
 
         public AddTagDialogViewModel(ITagService tagService)
         {

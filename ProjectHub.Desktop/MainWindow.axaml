@@ -25,9 +25,9 @@
         </Style>
     </Window.Styles>
 
-    <Window.DataContext>
+    <Design.DataContext>
         <vm:MainWindowViewModel />
-    </Window.DataContext>
+    </Design.DataContext>
     <Window.DataTemplates>
         <DataTemplate DataType="models:Project">
             <Border Background="LightBlue" Margin="0,5" Padding="10">
@@ -231,7 +231,7 @@
                         <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8">
                             <icons:MaterialIcon Kind="Folder" Width="18" Height="18" VerticalAlignment="Center" />
                             <TextBlock Grid.Column="0"
-                                       Text="全部项目"
+                                       Text="全部工作区和项目"
                                        FontWeight="SemiBold"
                                        FontSize="14"
                                        VerticalAlignment="Center" />
@@ -301,14 +301,14 @@
                                                 <!-- 名称和别名 -->
                                                 <DockPanel Grid.Column="1" VerticalAlignment="Center" LastChildFill="True">
                                                     <TextBlock DockPanel.Dock="Right"
-                                                               Text="{Binding Alias, StringFormat=' ({0})'}"
+                                                               Text="{Binding Alias, StringFormat=' ({0})', FallbackValue={x:Null}}"
                                                                FontSize="14"
                                                                Foreground="{DynamicResource App.SecondaryTextBrush}"
                                                                TextTrimming="CharacterEllipsis"
                                                                MaxLines="1"
                                                                VerticalAlignment="Center"
                                                                Margin="4,0,0,0"
-                                                               IsVisible="{Binding Alias, Converter={x:Static local:StringIsNotNullOrEmptyConverter.Instance}}"/>
+                                                               IsVisible="{Binding Alias, Converter={x:Static local:StringIsNotNullOrEmptyConverter.Instance}, FallbackValue=False}"/>
                                                     <TextBlock Text="{Binding Name}"
                                                                FontSize="18"
                                                                FontWeight="SemiBold"
@@ -317,28 +317,48 @@
                                                                VerticalAlignment="Center"/>
                                                 </DockPanel>
 
-                                                <!-- 收藏按钮 -->
+                                                <!-- 收藏按钮（仅项目显示） -->
                                                 <Button Grid.Column="2"
                                                         Classes="IconButton"
                                                         Command="{Binding DataContext.ToggleFavoriteCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"
                                                         CommandParameter="{Binding}"
-                                                        Margin="8,0">
-                                                    <icons:MaterialIcon Kind="{Binding IsFavorite, Converter={x:Static local:BoolToFavoriteIconConverter.Instance}}" Width="18" Height="18" />
+                                                        Margin="8,0"
+                                                        IsVisible="{Binding Converter={x:Static local:IsWorkspaceConverter.Instance}, ConverterParameter=Invert}">
+                                                    <icons:MaterialIcon Kind="{Binding IsFavorite, Converter={x:Static local:BoolToFavoriteIconConverter.Instance}, FallbackValue={x:Static micons:MaterialIconKind.StarOutline}}" Width="18" Height="18" />
                                                 </Button>
 
-                                                <!-- 更多操作 -->
+                                                <!-- 更多操作（仅项目显示） -->
                                                 <Button Grid.Column="3"
                                                         Content="&#x22EE;"
                                                         Classes="IconButton"
                                                         ToolTip.Tip="更多操作"
                                                         Tag="{Binding}"
-                                                        Click="OnMoreOptionsClick">
+                                                        Click="OnMoreOptionsClick"
+                                                        IsVisible="{Binding Converter={x:Static local:IsWorkspaceConverter.Instance}, ConverterParameter=Invert}">
                                                     <Button.ContextMenu>
                                                         <ContextMenu>
                                                             <MenuItem Header="编辑"
                                                                       Command="{Binding EditProjectCommand}" />
                                                             <MenuItem Header="删除"
                                                                       Command="{Binding DeleteProjectCommand}" />
+                                                        </ContextMenu>
+                                                    </Button.ContextMenu>
+                                                </Button>
+
+                                                <!-- 工作区操作（仅工作区显示） -->
+                                                <Button Grid.Column="3"
+                                                        Content="&#x22EE;"
+                                                        Classes="IconButton"
+                                                        ToolTip.Tip="工作区操作"
+                                                        IsVisible="{Binding Converter={x:Static local:IsWorkspaceConverter.Instance}}">
+                                                    <Button.ContextMenu>
+                                                        <ContextMenu>
+                                                            <MenuItem Header="编辑工作区"
+                                                                      Click="OnEditWorkspaceClick"
+                                                                      Tag="{Binding}" />
+                                                            <MenuItem Header="删除工作区"
+                                                                      Click="OnDeleteWorkspaceClick"
+                                                                      Tag="{Binding}" />
                                                         </ContextMenu>
                                                     </Button.ContextMenu>
                                                 </Button>
@@ -354,10 +374,11 @@
                                                        Margin="0,8,0,0"
                                                        IsVisible="{Binding Description, Converter={x:Static local:StringIsNotNullOrEmptyConverter.Instance}}"/>
 
-                                            <!-- 第三行：标签 -->
+                                            <!-- 第三行：标签（仅项目显示） -->
                                             <ItemsControl Grid.Row="2"
-                                                          ItemsSource="{Binding Tags, Converter={x:Static local:TagsToLimitedConverter.Instance}, ConverterParameter='10'}"
-                                                          Margin="0,12,0,0">
+                                                          ItemsSource="{Binding Tags, Converter={x:Static local:TagsToLimitedConverter.Instance}, ConverterParameter='10', FallbackValue={x:Null}}"
+                                                          Margin="0,12,0,0"
+                                                          IsVisible="{Binding Converter={x:Static local:IsWorkspaceConverter.Instance}, ConverterParameter=Invert}">
                                                 <ItemsControl.ItemsPanel>
                                                     <ItemsPanelTemplate>
                                                         <StackPanel Orientation="Horizontal" Spacing="6"/>
@@ -376,19 +397,20 @@
                                                 </ItemsControl.ItemTemplate>
                                             </ItemsControl>
 
-                                            <!-- 第四行：路径和打开时间 + IDE按钮 -->
-                                            <Grid Grid.Row="3" Margin="0,12,0,0">
+                                            <!-- 第四行：路径和打开时间 + IDE按钮（仅项目显示） -->
+                                            <Grid Grid.Row="3" Margin="0,12,0,0"
+                                                  IsVisible="{Binding Converter={x:Static local:IsWorkspaceConverter.Instance}, ConverterParameter=Invert}">
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="*"/>
                                                     <ColumnDefinition Width="Auto"/>
                                                 </Grid.ColumnDefinitions>
 
                                                 <StackPanel Grid.Column="0" Orientation="Vertical">
-                                                    <TextBlock Text="{Binding Path}"
+                                                    <TextBlock Text="{Binding Path, FallbackValue=''}"
                                                                FontSize="11"
                                                                Foreground="{DynamicResource App.SecondaryTextBrush}"
                                                                TextTrimming="CharacterEllipsis"/>
-                                                    <TextBlock Text="{Binding LastOpenedAt, Converter={x:Static local:DateTimeToRelativeConverter.Instance}}"
+                                                    <TextBlock Text="{Binding LastOpenedAt, Converter={x:Static local:DateTimeToRelativeConverter.Instance}, FallbackValue=''}"
                                                                FontSize="11"
                                                                Foreground="{DynamicResource App.SecondaryTextBrush}"
                                                                Margin="0,2,0,0"/>
@@ -402,6 +424,23 @@
                                                         Command="{Binding DataContext.LaunchProjectCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"
                                                         CommandParameter="{Binding}"/>
                                             </Grid>
+
+                                            <!-- 工作区信息行（仅工作区显示） -->
+                                            <StackPanel Grid.Row="3" Margin="0,12,0,0"
+                                                        IsVisible="{Binding Converter={x:Static local:IsWorkspaceConverter.Instance}}">
+                                                <TextBlock FontSize="11"
+                                                           Foreground="{DynamicResource App.SecondaryTextBrush}">
+                                                    <TextBlock.Text>
+                                                        <MultiBinding StringFormat="包含 {0} 个项目">
+                                                            <Binding Path="ProjectIds.Count" FallbackValue="0"/>
+                                                        </MultiBinding>
+                                                    </TextBlock.Text>
+                                                </TextBlock>
+                                                <TextBlock Text="{Binding CreatedAt, Converter={x:Static local:DateTimeToRelativeConverter.Instance}, StringFormat='创建于 {0}'}"
+                                                           FontSize="11"
+                                                           Foreground="{DynamicResource App.SecondaryTextBrush}"
+                                                           Margin="0,2,0,0"/>
+                                            </StackPanel>
                                         </Grid>
                                     </Border>
                                 </DataTemplate>
@@ -447,16 +486,17 @@
                                                            FontSize="14"
                                                            FontWeight="Medium"
                                                            VerticalAlignment="Center"/>
-                                                <TextBlock Text="{Binding Alias, StringFormat=' ({0})'}"
+                                                <TextBlock Text="{Binding Alias, StringFormat=' ({0})', FallbackValue={x:Null}}"
                                                            FontSize="12"
                                                            Foreground="{DynamicResource App.SecondaryTextBrush}"
                                                            VerticalAlignment="Center"
-                                                           IsVisible="{Binding Alias, Converter={x:Static local:StringIsNotNullOrEmptyConverter.Instance}}"/>
+                                                           IsVisible="{Binding Alias, Converter={x:Static local:StringIsNotNullOrEmptyConverter.Instance}, ConverterParameter=InvertIfWorkspace, FallbackValue=False}"/>
 
-                                                <!-- 标签（最多3个） -->
-                                                <ItemsControl ItemsSource="{Binding Tags, Converter={x:Static local:TagsToLimitedConverter.Instance}, ConverterParameter='3'}"
+                                                <!-- 标签（最多3个，仅项目显示） -->
+                                                <ItemsControl ItemsSource="{Binding Tags, Converter={x:Static local:TagsToLimitedConverter.Instance}, ConverterParameter='3', FallbackValue={x:Null}}"
                                                               Margin="12,0,0,0"
-                                                              VerticalAlignment="Center">
+                                                              VerticalAlignment="Center"
+                                                              IsVisible="{Binding Converter={x:Static local:IsWorkspaceConverter.Instance}, ConverterParameter=Invert}">
                                                     <ItemsControl.ItemsPanel>
                                                         <ItemsPanelTemplate>
                                                             <StackPanel Orientation="Horizontal" Spacing="4"/>
@@ -474,6 +514,14 @@
                                                         </DataTemplate>
                                                     </ItemsControl.ItemTemplate>
                                                 </ItemsControl>
+
+                                                <!-- 工作区显示（仅工作区显示） -->
+                                                <TextBlock Text="(工作区)"
+                                                           FontSize="12"
+                                                           Foreground="{DynamicResource App.SecondaryTextBrush}"
+                                                           VerticalAlignment="Center"
+                                                           Margin="8,0,0,0"
+                                                           IsVisible="{Binding Converter={x:Static local:IsWorkspaceConverter.Instance}}"/>
                                             </StackPanel>
 
                                             <!-- 操作列 -->
@@ -484,20 +532,23 @@
                                                         Classes="SmallIconButton"
                                                         ToolTip.Tip="使用默认IDE打开"
                                                         Command="{Binding DataContext.LaunchProjectCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"
-                                                        CommandParameter="{Binding}"/>
+                                                        CommandParameter="{Binding}"
+                                                        IsVisible="{Binding Converter={x:Static local:IsWorkspaceConverter.Instance}, ConverterParameter=Invert}"/>
                                                 <Button
                                                         Classes="SmallIconButton"
                                                         ToolTip.Tip="收藏项目"
                                                         Command="{Binding DataContext.ToggleFavoriteCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"
-                                                        CommandParameter="{Binding}">
-                                                    <icons:MaterialIcon Kind="{Binding IsFavorite, Converter={x:Static local:BoolToFavoriteIconConverter.Instance}}" Width="14" Height="14" />
+                                                        CommandParameter="{Binding}"
+                                                        IsVisible="{Binding Converter={x:Static local:IsWorkspaceConverter.Instance}, ConverterParameter=Invert}">
+                                                    <icons:MaterialIcon Kind="{Binding IsFavorite, Converter={x:Static local:BoolToFavoriteIconConverter.Instance}, FallbackValue={x:Static micons:MaterialIconKind.StarOutline}}" Width="14" Height="14" />
                                                 </Button>
-                                                <!-- 更多操作（IDE子菜单在code-behind动态注入） -->
+                                                <!-- 更多操作（仅项目显示，IDE子菜单在code-behind动态注入） -->
                                                 <Button Content="&#x22EE;"
                                                         Classes="SmallIconButton"
                                                         ToolTip.Tip="更多操作"
                                                         Tag="{Binding}"
-                                                        Click="OnMoreOptionsClick">
+                                                        Click="OnMoreOptionsClick"
+                                                        IsVisible="{Binding Converter={x:Static local:IsWorkspaceConverter.Instance}, ConverterParameter=Invert}">
                                                     <Button.ContextMenu>
                                                         <ContextMenu>
                                                             <MenuItem Header="编辑"
@@ -506,6 +557,24 @@
                                                             <MenuItem Header="删除"
                                                                       Command="{Binding DeleteProjectCommand}"
                                                                       CommandParameter="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />
+                                                        </ContextMenu>
+                                                    </Button.ContextMenu>
+                                                </Button>
+
+                                                <!-- 工作区操作（仅工作区显示） -->
+                                                <Button Content="&#x22EE;"
+                                                        Classes="SmallIconButton"
+                                                        ToolTip.Tip="工作区操作"
+                                                        Tag="{Binding}"
+                                                        IsVisible="{Binding Converter={x:Static local:IsWorkspaceConverter.Instance}}">
+                                                    <Button.ContextMenu>
+                                                        <ContextMenu>
+                                                            <MenuItem Header="编辑工作区"
+                                                                      Click="OnEditWorkspaceClick"
+                                                                      Tag="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />
+                                                            <MenuItem Header="删除工作区"
+                                                                      Click="OnDeleteWorkspaceClick"
+                                                                      Tag="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />
                                                         </ContextMenu>
                                                     </Button.ContextMenu>
                                                 </Button>
@@ -541,13 +610,14 @@
                                                 <ColumnDefinition Width="Auto"/>
                                             </Grid.ColumnDefinitions>
 
-                                            <!-- 收藏图标 -->
+                                            <!-- 收藏图标（仅项目显示） -->
                                             <icons:MaterialIcon Grid.Column="0"
-                                                       Kind="{Binding IsFavorite, Converter={x:Static local:BoolToFavoriteIconConverter.Instance}}"
+                                                       Kind="{Binding IsFavorite, Converter={x:Static local:BoolToFavoriteIconConverter.Instance}, FallbackValue={x:Static micons:MaterialIconKind.StarOutline}}"
                                                        Width="12"
                                                        Height="12"
                                                        Margin="0,0,8,0"
-                                                       VerticalAlignment="Center"/>
+                                                       VerticalAlignment="Center"
+                                                       IsVisible="{Binding Converter={x:Static local:IsWorkspaceConverter.Instance}, ConverterParameter=Invert}"/>
 
                                             <!-- 项目类型图标 -->
                                             <icons:MaterialIcon Grid.Column="1"
@@ -558,19 +628,28 @@
                                                        VerticalAlignment="Center"/>
 
                                             <!-- 名称 -->
-                                            <TextBlock Grid.Column="2"
-                                                       Text="{Binding Name}"
-                                                       FontSize="13"
-                                                       VerticalAlignment="Center"
-                                                       TextTrimming="CharacterEllipsis"/>
+                                            <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding Name}"
+                                                           FontSize="13"
+                                                           VerticalAlignment="Center"
+                                                           TextTrimming="CharacterEllipsis"/>
+                                                <!-- 工作区后缀标识（仅工作区显示） -->
+                                                <TextBlock Text="(工作区)"
+                                                           FontSize="11"
+                                                           Foreground="{DynamicResource App.SecondaryTextBrush}"
+                                                           VerticalAlignment="Center"
+                                                           Margin="4,0,0,0"
+                                                           IsVisible="{Binding Converter={x:Static local:IsWorkspaceConverter.Instance}}"/>
+                                            </StackPanel>
 
-                                            <!-- 打开按钮 -->
+                                            <!-- 打开按钮（仅项目显示） -->
                                             <Button Grid.Column="3"
                                                     Content="{Binding Converter={x:Static local:DefaultIdeConverter.Instance}}"
                                                     Classes="SmallIconButton"
                                                     ToolTip.Tip="使用默认IDE打开"
                                                     Command="{Binding DataContext.LaunchProjectCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"
-                                                    CommandParameter="{Binding}">
+                                                    CommandParameter="{Binding}"
+                                                    IsVisible="{Binding Converter={x:Static local:IsWorkspaceConverter.Instance}, ConverterParameter=Invert}">
                                                 <Button.ContextMenu>
                                                     <ContextMenu x:Name="CompactItemContextMenu">
                                                         <MenuItem Header="编辑"
@@ -579,6 +658,25 @@
                                                         <MenuItem Header="删除"
                                                                   Command="{Binding DeleteProjectCommand}"
                                                                   CommandParameter="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />
+                                                    </ContextMenu>
+                                                </Button.ContextMenu>
+                                            </Button>
+
+                                            <!-- 工作区操作（仅工作区显示） -->
+                                            <Button Grid.Column="3"
+                                                    Content="&#x22EE;"
+                                                    Classes="SmallIconButton"
+                                                    ToolTip.Tip="工作区操作"
+                                                    Tag="{Binding}"
+                                                    IsVisible="{Binding Converter={x:Static local:IsWorkspaceConverter.Instance}}">
+                                                <Button.ContextMenu>
+                                                    <ContextMenu>
+                                                        <MenuItem Header="编辑工作区"
+                                                                  Click="OnEditWorkspaceClick"
+                                                                  Tag="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />
+                                                        <MenuItem Header="删除工作区"
+                                                                  Click="OnDeleteWorkspaceClick"
+                                                                  Tag="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />
                                                     </ContextMenu>
                                                 </Button.ContextMenu>
                                             </Button>

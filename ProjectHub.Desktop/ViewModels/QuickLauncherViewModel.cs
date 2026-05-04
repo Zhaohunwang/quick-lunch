@@ -27,11 +27,17 @@ namespace ProjectHub.Desktop.ViewModels
         [ObservableProperty]
         private Project? _selectedProject;
 
-        public QuickLauncherViewModel()
+        public QuickLauncherViewModel() : this(
+            new ProjectService(), new IdeLauncherService(), new SearchService()) { }
+
+        public QuickLauncherViewModel(
+            IProjectService projectService,
+            IIdeLauncherService ideLauncherService,
+            ISearchService searchService)
         {
-            _projectService = new ProjectService();
-            _ideLauncherService = new IdeLauncherService();
-            _searchService = new SearchService();
+            _projectService = projectService;
+            _ideLauncherService = ideLauncherService;
+            _searchService = searchService;
             _ = LoadProjects();
         }
 

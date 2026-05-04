@@ -1,6 +1,7 @@
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
+using Microsoft.Extensions.DependencyInjection;
 using ProjectHub.Desktop.ViewModels;
 
 namespace ProjectHub.Desktop.Views;
@@ -10,6 +11,7 @@ public partial class AddProjectDialog : Window
     public AddProjectDialog()
     {
         InitializeComponent();
+        DataContext = App.Services.GetRequiredService<AddProjectDialogViewModel>();
     }
 
     private async void BrowseFolderButton_Click(object sender, RoutedEventArgs e)

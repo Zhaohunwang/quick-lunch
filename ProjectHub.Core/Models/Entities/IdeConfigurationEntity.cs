@@ -1,6 +1,6 @@
-namespace ProjectHub.Core.Models;
+namespace ProjectHub.Core.Models.Entities;
 
-public class IdeConfiguration
+public class IdeConfigurationEntity
 {
     public long Id { get; set; }
 
@@ -15,4 +15,6 @@ public class IdeConfiguration
     public string? Icon { get; set; }
 
     public long ProjectId { get; set; }
+
+    public ProjectEntity Project { get; set; } = null!;
 }

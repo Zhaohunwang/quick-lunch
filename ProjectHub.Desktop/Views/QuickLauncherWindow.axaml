@@ -9,9 +9,9 @@
         WindowStartupLocation="CenterScreen" 
         CanResize="False" 
         ShowInTaskbar="False">
-    <Window.DataContext>
+    <Design.DataContext>
         <vm:QuickLauncherViewModel />
-    </Window.DataContext>
+    </Design.DataContext>
     <Grid Background="#2C2C2C">
         <Grid.RowDefinitions>
             <RowDefinition Height="60" />

@@ -1,6 +1,6 @@
-namespace ProjectHub.Core.Models;
+namespace ProjectHub.Core.Models.Entities;
 
-public class Tag
+public class TagEntity
 {
     public long Id { get; set; }
 
@@ -9,4 +9,6 @@ public class Tag
     public string Color { get; set; } = "#3498db";
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+    public List<ProjectTagEntity> ProjectTags { get; set; } = new();
 }

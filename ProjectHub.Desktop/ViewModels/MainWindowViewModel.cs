@@ -117,14 +117,23 @@ namespace ProjectHub.Desktop.ViewModels
             CurrentViewMode = mode;
         }
 
-        public MainWindowViewModel()
+        public MainWindowViewModel() : this(
+            new ProjectService(), new IdeLauncherService(),
+            new SearchService(), new TagService(), new WorkspaceService()) { }
+
+        public MainWindowViewModel(
+            IProjectService projectService,
+            IIdeLauncherService ideLauncherService,
+            ISearchService searchService,
+            ITagService tagService,
+            IWorkspaceService workspaceService)
         {
-            _projectService = new ProjectService();
-            _ideLauncherService = new IdeLauncherService();
-            _searchService = new SearchService();
-            _tagService = new TagService();
-            _workspaceService = new WorkspaceService(_projectService);
-            
+            _projectService = projectService;
+            _ideLauncherService = ideLauncherService;
+            _searchService = searchService;
+            _tagService = tagService;
+            _workspaceService = workspaceService;
+
             LoadTagsSync();
             _ = LoadDataAsync();
             _ = LoadAvailableIdesAsync();
@@ -179,17 +188,18 @@ namespace ProjectHub.Desktop.ViewModels
             {
                 Projects.Add(project);
             }
-            AllProjectsCount = projects.Count;
+
+            // 仅更新项目相关的计数
             FavoriteProjectsCount = projects.Count(p => p.IsFavorite);
             RecentProjectsCount = projects.Count(p => p.LastOpenedAt > DateTime.UtcNow.AddDays(-7));
-            Console.WriteLine($"Counts: All={AllProjectsCount}, Favorite={FavoriteProjectsCount}, Recent={RecentProjectsCount}");
-            OnPropertyChanged(nameof(AllProjectsText));
+            Console.WriteLine($"Counts: Favorite={FavoriteProjectsCount}, Recent={RecentProjectsCount}");
             OnPropertyChanged(nameof(FavoriteProjectsText));
             OnPropertyChanged(nameof(RecentProjectsText));
-            
+
+            // AllProjectsCount 将在 LoadWorkspacesForList() 中更新
+
             await LoadWorkspacesForList();
-            
-            ApplyFilter();
+
             Console.WriteLine("LoadProjects completed");
         }
 
@@ -198,41 +208,60 @@ namespace ProjectHub.Desktop.ViewModels
             Console.WriteLine("LoadWorkspacesForList started");
             var workspaces = await _workspaceService.GetAllWorkspacesAsync();
             Console.WriteLine($"Workspaces loaded: {workspaces.Count}");
-            
+
             AllItems.Clear();
-            
+
+            // 添加工作区（排在前面）
             foreach (var workspace in workspaces)
             {
                 AllItems.Add(workspace);
                 Console.WriteLine($"Added workspace: {workspace.Name}");
             }
-            
+
+            // 添加项目（排在后面）
             foreach (var project in Projects)
             {
                 AllItems.Add(project);
                 Console.WriteLine($"Added project: {project.Name}");
             }
-            Console.WriteLine($"AllItems count: {AllItems.Count}");
+
+            // 更新计数：全部数量 = 工作区数 + 项目数
+            AllProjectsCount = workspaces.Count + Projects.Count;
+            Console.WriteLine($"AllItems count: {AllItems.Count}, Total count: {AllProjectsCount}");
+
+            OnPropertyChanged(nameof(AllProjectsText));
             Console.WriteLine("LoadWorkspacesForList completed");
         }
 
         private void ApplyFilter()
         {
-            IEnumerable<Project> filteredProjects = CurrentFilter switch
-            {
-                "favorite" => Projects.Where(p => p.IsFavorite),
-                "recent" => Projects.Where(p => p.LastOpenedAt > DateTime.UtcNow.AddDays(-7)),
-                "tag" => Projects.Where(p => p.Tags.Contains(SelectedTag.TrimStart('#'))),
-                _ => Projects
-            };
-
             FilteredItems.Clear();
-            
-            foreach (var project in filteredProjects)
+
+            if (CurrentFilter == "all")
             {
-                FilteredItems.Add(project);
+                // 全部模式：显示工作区 + 项目（工作区在前，项目在后）
+                foreach (var item in AllItems)
+                {
+                    FilteredItems.Add(item);
+                }
             }
-            
+            else
+            {
+                // 其他模式（收藏、最近、标签）：仅显示项目
+                IEnumerable<Project> filteredProjects = CurrentFilter switch
+                {
+                    "favorite" => Projects.Where(p => p.IsFavorite),
+                    "recent" => Projects.Where(p => p.LastOpenedAt > DateTime.UtcNow.AddDays(-7)),
+                    "tag" => Projects.Where(p => p.Tags.Contains(SelectedTag.TrimStart('#'))),
+                    _ => Projects
+                };
+
+                foreach (var project in filteredProjects)
+                {
+                    FilteredItems.Add(project);
+                }
+            }
+
             OnPropertyChanged(nameof(FilteredItems));
         }
 
@@ -619,6 +648,96 @@ namespace ProjectHub.Desktop.ViewModels
             {
                 await dialog.ShowDialog(mainWindow);
                 await LoadAvailableIdesAsync();
+            }
+        }
+
+        [RelayCommand]
+        private async Task EditWorkspace(Workspace workspace)
+        {
+            if (workspace == null) return;
+
+            var dialog = new AddWorkspaceDialog();
+            var viewModel = dialog.DataContext as AddWorkspaceDialogViewModel;
+            if (viewModel != null)
+            {
+                viewModel.LoadWorkspace(workspace);
+            }
+
+            var mainWindow = App.Current?.ApplicationLifetime is Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime desktop
+                ? desktop.MainWindow as MainWindow
+                : null;
+
+            if (mainWindow != null)
+            {
+                var result = await dialog.ShowDialog<bool>(mainWindow);
+                if (result == true && viewModel != null)
+                {
+                    var updatedWorkspace = viewModel.CreateWorkspace();
+                    updatedWorkspace.Id = workspace.Id;
+                    updatedWorkspace.CreatedAt = workspace.CreatedAt;
+                    await _workspaceService.UpdateWorkspaceAsync(updatedWorkspace);
+                    await LoadWorkspacesForList();
+                }
+            }
+        }
+
+        [RelayCommand]
+        private async Task DeleteWorkspace(Workspace workspace)
+        {
+            if (workspace == null) return;
+
+            var mainWindow = App.Current?.ApplicationLifetime is Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime desktop
+                ? desktop.MainWindow as MainWindow
+                : null;
+
+            if (mainWindow != null)
+            {
+                var dialog = new Avalonia.Controls.Window
+                {
+                    Title = "确认删除工作区",
+                    Width = 400,
+                    Height = 200,
+                    WindowStartupLocation = Avalonia.Controls.WindowStartupLocation.CenterOwner,
+                    Background = Avalonia.Media.Brushes.White,
+                    BorderThickness = new Avalonia.Thickness(1),
+                    BorderBrush = Avalonia.Media.Brushes.LightGray,
+                    CornerRadius = new Avalonia.CornerRadius(8),
+                    Padding = new Avalonia.Thickness(0)
+                };
+
+                var panel = new Avalonia.Controls.StackPanel { Margin = new Avalonia.Thickness(24) };
+                panel.Children.Add(new Avalonia.Controls.TextBlock
+                {
+                    Text = $"确定要删除工作区「{workspace.Name}」吗？\n\n此操作不可撤销，工作区的项目关联将被移除。",
+                    TextWrapping = Avalonia.Media.TextWrapping.Wrap,
+                    FontSize = 14
+                });
+
+                var buttonPanel = new Avalonia.Controls.StackPanel
+                {
+                    Orientation = Avalonia.Layout.Orientation.Horizontal,
+                    HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Right,
+                    Spacing = 12,
+                    Margin = new Avalonia.Thickness(0, 24, 0, 0)
+                };
+
+                var cancelBtn = new Avalonia.Controls.Button { Content = "取消", MinWidth = 80 };
+                cancelBtn.Click += (s, e) => dialog.Close();
+
+                var deleteBtn = new Avalonia.Controls.Button { Content = "确认删除", MinWidth = 80, Classes = { "Primary" } };
+                deleteBtn.Click += async (s, e) =>
+                {
+                    await _workspaceService.DeleteWorkspaceAsync(workspace.Id);
+                    await LoadWorkspacesForList();
+                    dialog.Close();
+                };
+
+                buttonPanel.Children.Add(cancelBtn);
+                buttonPanel.Children.Add(deleteBtn);
+                panel.Children.Add(buttonPanel);
+                dialog.Content = panel;
+
+                await dialog.ShowDialog(mainWindow);
             }
         }
 
