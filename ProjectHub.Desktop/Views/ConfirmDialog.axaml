@@ -1,0 +1,41 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:icons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+        mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="200"
+        x:Class="ProjectHub.Desktop.Views.ConfirmDialog"
+        Title="{Binding Title}"
+        Width="420" Height="200"
+        Icon="avares://ProjectHub.Desktop/Assets/app-icon.ico"
+        WindowStartupLocation="CenterOwner"
+        CanResize="False"
+        Background="{DynamicResource App.BackgroundBrush}">
+
+    <Grid Margin="24" RowDefinitions="Auto,*,Auto">
+
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="10" Margin="0,0,0,16">
+            <icons:MaterialIcon Kind="AlertOutline" Width="22" Height="22"
+                                Foreground="{DynamicResource App.DangerBrush}" VerticalAlignment="Center"/>
+            <TextBlock Text="{Binding Title}" FontSize="18" FontWeight="SemiBold"
+                       VerticalAlignment="Center"/>
+        </StackPanel>
+
+        <TextBlock Grid.Row="1"
+                   Text="{Binding Message}"
+                   FontSize="14"
+                   TextWrapping="Wrap"
+                   Foreground="{DynamicResource App.PrimaryTextBrush}"
+                   VerticalAlignment="Top"/>
+
+        <StackPanel Grid.Row="2"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Right"
+                    Spacing="12"
+                    Margin="0,20,0,0">
+            <Button Content="取消" MinWidth="80" Click="OnCancelClicked"/>
+            <Button Content="{Binding ConfirmText}" MinWidth="80" Classes="DangerButton" Click="OnConfirmClicked"/>
+        </StackPanel>
+
+    </Grid>
+</Window>

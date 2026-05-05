@@ -7,6 +7,7 @@
         x:Class="ProjectHub.Desktop.Views.TagListDialog"
         Title="所有标签"
         Width="300" Height="400"
+        Icon="avares://ProjectHub.Desktop/Assets/app-icon.ico"
         WindowStartupLocation="CenterOwner"
         CanResize="False">
 

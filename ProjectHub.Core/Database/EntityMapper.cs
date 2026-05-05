@@ -112,10 +112,12 @@ public static class EntityMapper
         Id = entity.Id,
         Name = entity.Name,
         Description = entity.Description,
+        DefaultIdeId = entity.DefaultIdeId,
         AutoInheritTags = entity.AutoInheritTags,
         CustomTags = JsonSerializer.Deserialize<List<string>>(entity.CustomTagsJson, JsonOptions) ?? new List<string>(),
         InheritedTags = inheritedTags,
         ProjectIds = entity.WorkspaceProjects.OrderBy(wp => wp.SortOrder).Select(wp => wp.ProjectId).ToList(),
+        IsFavorite = entity.IsFavorite,
         CreatedAt = entity.CreatedAt,
         UpdatedAt = entity.UpdatedAt
     };
@@ -125,8 +127,10 @@ public static class EntityMapper
         Id = domain.Id,
         Name = domain.Name,
         Description = domain.Description,
+        DefaultIdeId = domain.DefaultIdeId,
         AutoInheritTags = domain.AutoInheritTags,
         CustomTagsJson = JsonSerializer.Serialize(domain.CustomTags, JsonOptions),
+        IsFavorite = domain.IsFavorite,
         CreatedAt = domain.CreatedAt,
         UpdatedAt = domain.UpdatedAt
     };

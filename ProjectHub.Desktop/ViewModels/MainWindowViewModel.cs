@@ -21,6 +21,7 @@ namespace ProjectHub.Desktop.ViewModels
         private readonly ISearchService _searchService;
         private readonly ITagService _tagService;
         private readonly IWorkspaceService _workspaceService;
+        private readonly IWorkspaceLauncherService _workspaceLauncherService;
 
         [ObservableProperty]
         private ObservableCollection<Project> _projects = new();
@@ -119,20 +120,23 @@ namespace ProjectHub.Desktop.ViewModels
 
         public MainWindowViewModel() : this(
             new ProjectService(), new IdeLauncherService(),
-            new SearchService(), new TagService(), new WorkspaceService()) { }
+            new SearchService(), new TagService(), new WorkspaceService(),
+            new WorkspaceLauncherService(new ProjectService())) { }
 
         public MainWindowViewModel(
             IProjectService projectService,
             IIdeLauncherService ideLauncherService,
             ISearchService searchService,
             ITagService tagService,
-            IWorkspaceService workspaceService)
+            IWorkspaceService workspaceService,
+            IWorkspaceLauncherService workspaceLauncherService)
         {
             _projectService = projectService;
             _ideLauncherService = ideLauncherService;
             _searchService = searchService;
             _tagService = tagService;
             _workspaceService = workspaceService;
+            _workspaceLauncherService = workspaceLauncherService;
 
             LoadTagsSync();
             _ = LoadDataAsync();
@@ -239,26 +243,35 @@ namespace ProjectHub.Desktop.ViewModels
 
             if (CurrentFilter == "all")
             {
-                // 全部模式：显示工作区 + 项目（工作区在前，项目在后）
                 foreach (var item in AllItems)
                 {
                     FilteredItems.Add(item);
                 }
             }
+            else if (CurrentFilter == "favorite")
+            {
+                foreach (var item in AllItems)
+                {
+                    if (item is Workspace ws && ws.IsFavorite)
+                        FilteredItems.Add(item);
+                    else if (item is Project p && p.IsFavorite)
+                        FilteredItems.Add(item);
+                }
+            }
             else
             {
-                // 其他模式（收藏、最近、标签）：仅显示项目
-                IEnumerable<Project> filteredProjects = CurrentFilter switch
+                IEnumerable<object> filtered = CurrentFilter switch
                 {
-                    "favorite" => Projects.Where(p => p.IsFavorite),
-                    "recent" => Projects.Where(p => p.LastOpenedAt > DateTime.UtcNow.AddDays(-7)),
-                    "tag" => Projects.Where(p => p.Tags.Contains(SelectedTag.TrimStart('#'))),
-                    _ => Projects
+                    "recent" => Projects.Where(p => p.LastOpenedAt > DateTime.UtcNow.AddDays(-7)).Cast<object>(),
+                    "tag" => AllItems.Where(item =>
+                        (item is Project p && p.Tags.Contains(SelectedTag.TrimStart('#'))) ||
+                        (item is Workspace ws && ws.AllTags.Contains(SelectedTag.TrimStart('#')))),
+                    _ => AllItems
                 };
 
-                foreach (var project in filteredProjects)
+                foreach (var item in filtered)
                 {
-                    FilteredItems.Add(project);
+                    FilteredItems.Add(item);
                 }
             }
 
@@ -413,79 +426,13 @@ namespace ProjectHub.Desktop.ViewModels
             
             if (mainWindow != null)
             {
-                var dialog = new Avalonia.Controls.Window
-                {
-                    Title = "确认删除",
-                    Width = 400,
-                    Height = 200,
-                    WindowStartupLocation = Avalonia.Controls.WindowStartupLocation.CenterOwner,
-                    Background = Avalonia.Media.Brushes.White,
-                    BorderThickness = new Avalonia.Thickness(1),
-                    BorderBrush = Avalonia.Media.Brushes.LightGray,
-                    CornerRadius = new Avalonia.CornerRadius(8),
-                    Padding = new Avalonia.Thickness(0)
-                };
+                var dialog = new ConfirmDialog(
+                    "确认删除",
+                    $"确定要删除项目 '{project.Name}' 吗？\n\n此操作将从项目列表中移除该项目，但保留磁盘上的文件。",
+                    "删除");
+                var result = await dialog.ShowDialog<bool>(mainWindow);
                 
-                var panel = new Avalonia.Controls.StackPanel { Margin = new Avalonia.Thickness(24) };
-                
-                var titleText = new Avalonia.Controls.TextBlock 
-                {
-                    Text = "确认删除",
-                    FontSize = 18,
-                    FontWeight = Avalonia.Media.FontWeight.SemiBold,
-                    Margin = new Avalonia.Thickness(0, 0, 0, 16)
-                };
-                panel.Children.Add(titleText);
-                
-                var contentText = new Avalonia.Controls.TextBlock 
-                {
-                    Text = $"确定要删除项目 '{project.Name}' 吗？",
-                    FontSize = 14,
-                    TextWrapping = Avalonia.Media.TextWrapping.Wrap,
-                    Margin = new Avalonia.Thickness(0, 0, 0, 24)
-                };
-                panel.Children.Add(contentText);
-                
-                var buttonPanel = new Avalonia.Controls.StackPanel 
-                {
-                    Orientation = Avalonia.Layout.Orientation.Horizontal,
-                    HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Right,
-                    Spacing = 12
-                };
-                
-                var cancelButton = new Avalonia.Controls.Button 
-                {
-                    Content = "取消",
-                    Width = 90,
-                    Height = 36,
-                    Background = Avalonia.Media.Brushes.Transparent,
-                    BorderThickness = new Avalonia.Thickness(1),
-                    BorderBrush = Avalonia.Media.Brushes.LightGray,
-                    CornerRadius = new Avalonia.CornerRadius(4)
-                };
-                
-                var deleteButton = new Avalonia.Controls.Button 
-                {
-                    Content = "删除",
-                    Width = 90,
-                    Height = 36,
-                    Background = Avalonia.Media.Brushes.Red,
-                    Foreground = Avalonia.Media.Brushes.White,
-                    CornerRadius = new Avalonia.CornerRadius(4)
-                };
-                
-                bool? dialogResult = null;
-                cancelButton.Click += (s, e) => { dialogResult = false; dialog.Close(); };
-                deleteButton.Click += (s, e) => { dialogResult = true; dialog.Close(); };
-                
-                buttonPanel.Children.Add(cancelButton);
-                buttonPanel.Children.Add(deleteButton);
-                panel.Children.Add(buttonPanel);
-                
-                dialog.Content = panel;
-                await dialog.ShowDialog(mainWindow);
-                
-                if (dialogResult == true)
+                if (result)
                 {
                     await _projectService.DeleteProjectAsync(project.Id);
                     Projects.Remove(project);
@@ -524,6 +471,7 @@ namespace ProjectHub.Desktop.ViewModels
                     updatedProject.CreatedAt = project.CreatedAt;
                     await _projectService.UpdateProjectAsync(updatedProject);
                     await LoadProjects();
+                    ApplyFilter();
                 }
             }
         }
@@ -544,6 +492,17 @@ namespace ProjectHub.Desktop.ViewModels
 
             FavoriteProjectsCount = Projects.Count(p => p.IsFavorite);
             OnPropertyChanged(nameof(FavoriteProjectsText));
+            ApplyFilter();
+        }
+
+        [RelayCommand]
+        private async Task ToggleFavoriteWorkspace(Workspace workspace)
+        {
+            if (workspace == null) return;
+
+            workspace.IsFavorite = !workspace.IsFavorite;
+            await _workspaceService.UpdateWorkspaceAsync(workspace);
+
             ApplyFilter();
         }
 
@@ -677,6 +636,7 @@ namespace ProjectHub.Desktop.ViewModels
                     updatedWorkspace.CreatedAt = workspace.CreatedAt;
                     await _workspaceService.UpdateWorkspaceAsync(updatedWorkspace);
                     await LoadWorkspacesForList();
+                    ApplyFilter();
                 }
             }
         }
@@ -692,52 +652,17 @@ namespace ProjectHub.Desktop.ViewModels
 
             if (mainWindow != null)
             {
-                var dialog = new Avalonia.Controls.Window
-                {
-                    Title = "确认删除工作区",
-                    Width = 400,
-                    Height = 200,
-                    WindowStartupLocation = Avalonia.Controls.WindowStartupLocation.CenterOwner,
-                    Background = Avalonia.Media.Brushes.White,
-                    BorderThickness = new Avalonia.Thickness(1),
-                    BorderBrush = Avalonia.Media.Brushes.LightGray,
-                    CornerRadius = new Avalonia.CornerRadius(8),
-                    Padding = new Avalonia.Thickness(0)
-                };
+                var dialog = new ConfirmDialog(
+                    "确认删除工作区",
+                    $"确定要删除工作区「{workspace.Name}」吗？\n\n此操作不可撤销，工作区的项目关联将被移除。",
+                    "确认删除");
+                var result = await dialog.ShowDialog<bool>(mainWindow);
 
-                var panel = new Avalonia.Controls.StackPanel { Margin = new Avalonia.Thickness(24) };
-                panel.Children.Add(new Avalonia.Controls.TextBlock
-                {
-                    Text = $"确定要删除工作区「{workspace.Name}」吗？\n\n此操作不可撤销，工作区的项目关联将被移除。",
-                    TextWrapping = Avalonia.Media.TextWrapping.Wrap,
-                    FontSize = 14
-                });
-
-                var buttonPanel = new Avalonia.Controls.StackPanel
-                {
-                    Orientation = Avalonia.Layout.Orientation.Horizontal,
-                    HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Right,
-                    Spacing = 12,
-                    Margin = new Avalonia.Thickness(0, 24, 0, 0)
-                };
-
-                var cancelBtn = new Avalonia.Controls.Button { Content = "取消", MinWidth = 80 };
-                cancelBtn.Click += (s, e) => dialog.Close();
-
-                var deleteBtn = new Avalonia.Controls.Button { Content = "确认删除", MinWidth = 80, Classes = { "Primary" } };
-                deleteBtn.Click += async (s, e) =>
+                if (result)
                 {
                     await _workspaceService.DeleteWorkspaceAsync(workspace.Id);
                     await LoadWorkspacesForList();
-                    dialog.Close();
-                };
-
-                buttonPanel.Children.Add(cancelBtn);
-                buttonPanel.Children.Add(deleteBtn);
-                panel.Children.Add(buttonPanel);
-                dialog.Content = panel;
-
-                await dialog.ShowDialog(mainWindow);
+                }
             }
         }
 
@@ -752,6 +677,49 @@ namespace ProjectHub.Desktop.ViewModels
             {
                 await LaunchProject(recentProject);
             }
+        }
+
+        [RelayCommand]
+        private async Task LaunchWorkspace(Workspace workspace)
+        {
+            if (workspace == null) return;
+            var ide = GetDefaultIdeTemplateForWorkspace(workspace);
+            if (ide == null)
+            {
+                FileLogger.Warn($"No IDE available to launch workspace '{workspace.Name}'. Please configure an IDE first.");
+                return;
+            }
+            try
+            {
+                await _workspaceLauncherService.LaunchWorkspaceAsync(workspace, ide);
+            }
+            catch (Exception ex)
+            {
+                FileLogger.Error($"Failed to launch workspace '{workspace.Name}' with IDE '{ide.Name}'", ex);
+            }
+        }
+
+        [RelayCommand]
+        private async Task LaunchWorkspaceWithIde((Workspace Workspace, IdeTemplate Ide) param)
+        {
+            if (param.Workspace == null || param.Ide == null) return;
+            try
+            {
+                await _workspaceLauncherService.LaunchWorkspaceAsync(param.Workspace, param.Ide);
+            }
+            catch (Exception ex)
+            {
+                FileLogger.Error($"Failed to launch workspace '{param.Workspace.Name}' with IDE '{param.Ide.Name}'", ex);
+            }
+        }
+
+        public IdeTemplate? GetDefaultIdeTemplateForWorkspace(Workspace workspace)
+        {
+            if (workspace.DefaultIdeId.HasValue)
+            {
+                return AvailableIdes.FirstOrDefault(ide => ide.Id == workspace.DefaultIdeId.Value);
+            }
+            return AvailableIdes.FirstOrDefault();
         }
     }
 }

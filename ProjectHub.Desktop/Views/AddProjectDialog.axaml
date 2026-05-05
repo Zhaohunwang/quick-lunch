@@ -9,6 +9,7 @@
         Title="{Binding DialogTitle}"
         Width="600" Height="700"
         MaxWidth="700" MaxHeight="800"
+        Icon="avares://ProjectHub.Desktop/Assets/app-icon.ico"
         WindowStartupLocation="CenterOwner"
         CanResize="True">
     <Design.DataContext>
@@ -103,7 +104,7 @@
                         </ItemsControl.ItemsPanel>
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
-                                <Border Background="#E3F2FD" 
+                                <Border Background="{DynamicResource App.NavigationActiveBackgroundBrush}" 
                                         CornerRadius="12" 
                                         Padding="8,4" 
                                         Margin="2">
@@ -123,7 +124,7 @@
                     </ItemsControl>
                     <TextBlock Text="提示：输入标签名称后点击添加，点击×可删除标签" 
                                FontSize="11" 
-                               Foreground="#6C757D" />
+                               Foreground="{DynamicResource App.SecondaryTextBrush}" />
                 </StackPanel>
                 
                 <!-- 默认IDE -->
@@ -131,11 +132,16 @@
                     <TextBlock Text="默认IDE" FontWeight="SemiBold" />
                     <ComboBox ItemsSource="{Binding AvailableIdes}"
                               SelectedItem="{Binding SelectedIde}"
-                              IsEnabled="{Binding IsIdeEnabled}" />
+                              IsEnabled="{Binding IsIdeEnabled}"
+                              DisplayMemberBinding="{Binding Name}" />
                     <TextBlock Text="提示：选择文件时无法使用IDE打开" 
                                FontSize="11" 
-                               Foreground="#6C757D"
+                               Foreground="{DynamicResource App.SecondaryTextBrush}"
                                IsVisible="{Binding IsFile}" />
+                    <TextBlock Text="提示：暂未配置IDE，可稍后在「⚙️ IDE设置」中添加"
+                               FontSize="11"
+                               Foreground="{DynamicResource App.SecondaryTextBrush}"
+                               IsVisible="{Binding NoIdeMessageVisible}" />
                 </StackPanel>
                 
                 <!-- 外观设置 -->

@@ -14,6 +14,7 @@ namespace ProjectHub.Desktop.ViewModels
     {
         private readonly IWorkspaceService _workspaceService;
         private readonly IProjectService _projectService;
+        private readonly IIdeLauncherService _ideLauncherService;
 
         [ObservableProperty]
         private string _workspaceName = string.Empty;
@@ -31,19 +32,42 @@ namespace ProjectHub.Desktop.ViewModels
         private ObservableCollection<Project> _availableProjects = new();
 
         [ObservableProperty]
+        private ObservableCollection<IdeTemplate> _availableIdes = new();
+
+        [ObservableProperty]
+        private IdeTemplate? _selectedIde;
+
+        [ObservableProperty]
         private bool _isEditMode = false;
+
+        [ObservableProperty]
+        private bool _isFavorite = false;
 
         [ObservableProperty]
         private string _errorMessage = string.Empty;
 
+        private long? _defaultIdeId;
+
         public string DialogTitle => IsEditMode ? "编辑工作区" : "添加工作区";
 
-        public AddWorkspaceDialogViewModel() : this(new WorkspaceService(), new ProjectService()) { }
+        public AddWorkspaceDialogViewModel() : this(new WorkspaceService(), new ProjectService(), new IdeLauncherService()) { }
 
-        public AddWorkspaceDialogViewModel(IWorkspaceService workspaceService, IProjectService projectService)
+        public AddWorkspaceDialogViewModel(IWorkspaceService workspaceService, IProjectService projectService, IIdeLauncherService ideLauncherService)
         {
             _workspaceService = workspaceService;
             _projectService = projectService;
+            _ideLauncherService = ideLauncherService;
+            _ = LoadIdesAsync();
+        }
+
+        private async Task LoadIdesAsync()
+        {
+            var ides = await _ideLauncherService.GetAvailableIdesAsync();
+            AvailableIdes.Clear();
+            foreach (var ide in ides)
+            {
+                AvailableIdes.Add(ide);
+            }
         }
 
         public async Task LoadProjectsAsync()
@@ -67,6 +91,13 @@ namespace ProjectHub.Desktop.ViewModels
             
             WorkspaceName = workspace.Name;
             Description = workspace.Description ?? string.Empty;
+            IsFavorite = workspace.IsFavorite;
+            _defaultIdeId = workspace.DefaultIdeId;
+            
+            if (workspace.DefaultIdeId.HasValue)
+            {
+                SelectedIde = AvailableIdes.FirstOrDefault(ide => ide.Id == workspace.DefaultIdeId.Value);
+            }
             
             SelectedProjects.Clear();
             var allProjects = _projectService.GetAllProjectsAsync().Result;
@@ -133,7 +164,9 @@ namespace ProjectHub.Desktop.ViewModels
             var workspace = new Workspace
             {
                 Name = WorkspaceName.Trim(),
-                Description = Description.Trim()
+                Description = Description.Trim(),
+                DefaultIdeId = SelectedIde?.Id,
+                IsFavorite = IsFavorite
             };
 
             if (IsEditMode)
@@ -206,7 +239,9 @@ namespace ProjectHub.Desktop.ViewModels
             var workspace = new Workspace
             {
                 Name = WorkspaceName.Trim(),
-                Description = Description.Trim()
+                Description = Description.Trim(),
+                DefaultIdeId = SelectedIde?.Id,
+                IsFavorite = IsFavorite
             };
 
             workspace.ProjectIds.Clear();

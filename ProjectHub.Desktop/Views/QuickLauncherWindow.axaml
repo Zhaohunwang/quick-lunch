@@ -6,13 +6,14 @@
         mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="500"
         x:Class="ProjectHub.Desktop.Views.QuickLauncherWindow"
         Title="Project Hub - 快速启动" 
+        Icon="avares://ProjectHub.Desktop/Assets/app-icon.ico"
         WindowStartupLocation="CenterScreen" 
         CanResize="False" 
         ShowInTaskbar="False">
     <Design.DataContext>
         <vm:QuickLauncherViewModel />
     </Design.DataContext>
-    <Grid Background="#2C2C2C">
+    <Grid Background="{DynamicResource App.BackgroundBrush}">
         <Grid.RowDefinitions>
             <RowDefinition Height="60" />
             <RowDefinition Height="*" />
@@ -20,23 +21,23 @@
         </Grid.RowDefinitions>
         <!-- 搜索框 -->
         <TextBox Grid.Row="0" Watermark="搜索项目、别名、标签..." 
-                 FontSize="16" Padding="12" Background="#3C3C3C" Foreground="White" 
+                 FontSize="16" Padding="12" Background="{DynamicResource App.TextBoxBackgroundBrush}" Foreground="{DynamicResource App.PrimaryTextBrush}" 
                  BorderThickness="0" CornerRadius="8" Margin="20" />
         <!-- 项目列表 -->
         <ListBox Grid.Row="1" Background="Transparent" BorderThickness="0" Margin="20">
             <ListBox.ItemTemplate>
                 <DataTemplate>
-                    <Border Margin="0 5 0 5" Background="#3C3C3C" Padding="15" CornerRadius="8">
+                    <Border Margin="0 5 0 5" Background="{DynamicResource App.SurfaceBrush}" Padding="15" CornerRadius="8">
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto" />
                                 <RowDefinition Height="Auto" />
                                 <RowDefinition Height="Auto" />
                             </Grid.RowDefinitions>
-                            <TextBlock Grid.Row="0" Text="项目名称" FontSize="16" FontWeight="Bold" Foreground="White" />
-                            <TextBlock Grid.Row="1" Text="项目别名" FontSize="12" Foreground="#AAAAAA" Margin="0 5 0 0" />
+                            <TextBlock Grid.Row="0" Text="项目名称" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource App.PrimaryTextBrush}" />
+                            <TextBlock Grid.Row="1" Text="项目别名" FontSize="12" Foreground="{DynamicResource App.SecondaryTextBrush}" Margin="0 5 0 0" />
                             <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0 5 0 0">
-                                <TextBlock Text="标签" FontSize="12" Foreground="#888888" />
+                                <TextBlock Text="标签" FontSize="12" Foreground="{DynamicResource App.SecondaryTextBrush}" />
                             </StackPanel>
                         </Grid>
                     </Border>
@@ -45,6 +46,6 @@
         </ListBox>
         <!-- 底部提示 -->
         <TextBlock Grid.Row="2" Text="↵打开(默认IDE)  ⋮→选择其他IDE  Ctrl+E编辑" 
-                   FontSize="12" Foreground="#888888" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                   FontSize="12" Foreground="{DynamicResource App.SecondaryTextBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
     </Grid>
 </Window>

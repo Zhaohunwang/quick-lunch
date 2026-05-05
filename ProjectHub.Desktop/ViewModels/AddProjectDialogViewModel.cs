@@ -49,16 +49,21 @@ namespace ProjectHub.Desktop.ViewModels
         private ObservableCollection<string> _availableTags = new();
 
         [ObservableProperty]
-        private ObservableCollection<string> _availableIdes = new();
+        private ObservableCollection<IdeTemplate> _availableIdes = new();
 
         [ObservableProperty]
-        private string _selectedIde = string.Empty;
+        [NotifyPropertyChangedFor(nameof(HasAvailableIdes))]
+        private IdeTemplate? _selectedIde;
 
         [ObservableProperty]
         private bool _isFavorite = false;
 
         [ObservableProperty]
         private bool _isEditMode = false;
+
+        public bool HasAvailableIdes => AvailableIdes.Count > 0;
+
+        public bool NoIdeMessageVisible => AvailableIdes.Count == 0;
 
         public string DialogTitle => IsEditMode ? "编辑项目" : "添加项目";
 
@@ -86,13 +91,13 @@ namespace ProjectHub.Desktop.ViewModels
         {
             IsEditMode = true;
             OnPropertyChanged(nameof(DialogTitle));
-            
+
             ProjectName = project.Name;
             ProjectPath = project.Path;
             Alias = project.Alias ?? string.Empty;
             Description = project.Description ?? string.Empty;
             IsFavorite = project.IsFavorite;
-            
+
             SelectedTags.Clear();
             foreach (var tag in project.Tags)
             {
@@ -102,7 +107,7 @@ namespace ProjectHub.Desktop.ViewModels
             var defaultIde = project.IdeConfigurations?.FirstOrDefault(ic => ic.IsDefault);
             if (defaultIde != null)
             {
-                SelectedIde = defaultIde.Name;
+                SelectedIde = AvailableIdes.FirstOrDefault(ide => ide.Name == defaultIde.Name);
             }
         }
 
@@ -128,7 +133,7 @@ namespace ProjectHub.Desktop.ViewModels
             _projectService = projectService;
             _ideLauncherService = ideLauncherService;
             _ = LoadAvailableTags();
-            LoadAvailableIdes();
+            _ = LoadAvailableIdesAsync();
         }
 
         private async Task LoadAvailableTags()
@@ -142,27 +147,33 @@ namespace ProjectHub.Desktop.ViewModels
             }
         }
 
-        private void LoadAvailableIdes()
+        private async Task LoadAvailableIdesAsync()
         {
+            var ides = await _ideLauncherService.GetAvailableIdesAsync();
             AvailableIdes.Clear();
-            AvailableIdes.Add("VS Code");
-            AvailableIdes.Add("Trae");
-            AvailableIdes.Add("WebStorm");
-            AvailableIdes.Add("IntelliJ IDEA");
-            AvailableIdes.Add("Visual Studio");
+            foreach (var ide in ides)
+            {
+                AvailableIdes.Add(ide);
+            }
+            OnPropertyChanged(nameof(HasAvailableIdes));
+            OnPropertyChanged(nameof(NoIdeMessageVisible));
         }
 
         public Project CreateProject()
         {
             var ideConfigurations = new List<IdeConfiguration>();
-            if (IsIdeEnabled && !string.IsNullOrWhiteSpace(SelectedIde))
+            long? defaultIdeId = null;
+
+            if (IsIdeEnabled && SelectedIde != null)
             {
                 ideConfigurations.Add(new IdeConfiguration
                 {
-                    Name = SelectedIde,
-                    ExecutablePath = GetIdeExecutablePath(SelectedIde),
+                    Name = SelectedIde.Name,
+                    ExecutablePath = SelectedIde.ExecutablePath,
+                    CommandArgs = SelectedIde.DefaultArgs,
                     IsDefault = true
                 });
+                defaultIdeId = SelectedIde.Id;
             }
 
             return new Project
@@ -172,23 +183,11 @@ namespace ProjectHub.Desktop.ViewModels
                 Alias = string.IsNullOrWhiteSpace(Alias) ? null : Alias,
                 Description = string.IsNullOrWhiteSpace(Description) ? null : Description,
                 Tags = SelectedTags.ToList(),
+                DefaultIdeId = defaultIdeId,
                 IdeConfigurations = ideConfigurations,
                 IsFavorite = IsFavorite,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
-            };
-        }
-
-        private string GetIdeExecutablePath(string ideName)
-        {
-            return ideName switch
-            {
-                "VS Code" => "code.exe",
-                "Trae" => "trae.exe",
-                "WebStorm" => "webstorm64.exe",
-                "IntelliJ IDEA" => "idea64.exe",
-                "Visual Studio" => "devenv.exe",
-                _ => "code.exe"
             };
         }
     }

@@ -69,6 +69,17 @@ namespace ProjectHub.Desktop.Templates
                 FontSize = 14,
                 VerticalAlignment = VerticalAlignment.Center 
             });
+            if (workspace.IsFavorite)
+            {
+                namePanel.Children.Add(new MaterialIcon 
+                { 
+                    Kind = MaterialIconKind.Star, 
+                    Width = 14, 
+                    Height = 14, 
+                    VerticalAlignment = VerticalAlignment.Center,
+                    Foreground = new SolidColorBrush(Color.Parse("#FFC107"))
+                });
+            }
             leftPanel.Children.Add(namePanel);
 
             if (!string.IsNullOrEmpty(workspace.Description))
@@ -122,8 +133,13 @@ namespace ProjectHub.Desktop.Templates
             };
             openButton.Content = new MaterialIcon { Kind = MaterialIconKind.Play, Width = 12, Height = 12 };
             ToolTip.SetTip(openButton, "打开工作区");
-            openButton.Click += (s, e) => 
+            openButton.Click += async (s, e) => 
             {
+                var vmCtx = GetViewModel();
+                if (vmCtx != null)
+                {
+                    await vmCtx.LaunchWorkspaceCommand.ExecuteAsync(workspace);
+                }
             };
             rightPanel.Children.Add(openButton);
 
@@ -133,8 +149,13 @@ namespace ProjectHub.Desktop.Templates
             };
             editButton.Content = new MaterialIcon { Kind = MaterialIconKind.Pencil, Width = 14, Height = 14 };
             ToolTip.SetTip(editButton, "编辑工作区");
-            editButton.Click += (s, e) => 
+            editButton.Click += async (s, e) => 
             {
+                var vmCtx = GetViewModel();
+                if (vmCtx != null)
+                {
+                    await vmCtx.EditWorkspaceCommand.ExecuteAsync(workspace);
+                }
             };
             rightPanel.Children.Add(editButton);
 
@@ -146,8 +167,60 @@ namespace ProjectHub.Desktop.Templates
             ToolTip.SetTip(deleteButton, "删除工作区");
             deleteButton.Click += (s, e) => 
             {
+                var vmCtx = GetViewModel();
+                if (vmCtx != null)
+                {
+                    vmCtx.DeleteWorkspaceCommand.Execute(workspace);
+                }
             };
             rightPanel.Children.Add(deleteButton);
+
+            var moreButton = new Button 
+            { 
+                Content = "⋮",
+                Classes = { "ToolButton" },
+                HorizontalContentAlignment = HorizontalAlignment.Center,
+                Padding = new Thickness(8, 4)
+            };
+            ToolTip.SetTip(moreButton, "更多操作");
+
+            var contextMenu = new ContextMenu();
+            var favMenuItem = new MenuItem
+            {
+                Header = workspace.IsFavorite ? "取消收藏" : "收藏"
+            };
+            favMenuItem.Click += async (s, e) =>
+            {
+                var vmCtx = GetViewModel();
+                if (vmCtx != null)
+                {
+                    await vmCtx.ToggleFavoriteWorkspaceCommand.ExecuteAsync(workspace);
+                }
+            };
+            contextMenu.Items.Add(favMenuItem);
+            contextMenu.Items.Add(new Separator());
+            var editCtxMenuItem = new MenuItem { Header = "编辑" };
+            editCtxMenuItem.Click += async (s, e) =>
+            {
+                var vmCtx = GetViewModel();
+                if (vmCtx != null)
+                {
+                    await vmCtx.EditWorkspaceCommand.ExecuteAsync(workspace);
+                }
+            };
+            contextMenu.Items.Add(editCtxMenuItem);
+            var deleteCtxMenuItem = new MenuItem { Header = "删除" };
+            deleteCtxMenuItem.Click += async (s, e) =>
+            {
+                var vmCtx = GetViewModel();
+                if (vmCtx != null)
+                {
+                    await vmCtx.DeleteWorkspaceCommand.ExecuteAsync(workspace);
+                }
+            };
+            contextMenu.Items.Add(deleteCtxMenuItem);
+            moreButton.ContextMenu = contextMenu;
+            rightPanel.Children.Add(moreButton);
 
             grid.Children.Add(leftPanel);
             grid.Children.Add(rightPanel);

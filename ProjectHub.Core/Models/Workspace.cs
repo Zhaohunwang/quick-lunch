@@ -8,6 +8,8 @@ public class Workspace
 
     public string? Description { get; set; }
 
+    public long? DefaultIdeId { get; set; }
+
     public List<long> ProjectIds { get; set; } = new();
 
     public List<string> CustomTags { get; set; } = new();
@@ -19,6 +21,8 @@ public class Workspace
     public List<string> AllTags => AutoInheritTags
         ? CustomTags.Union(InheritedTags).ToList()
         : CustomTags;
+
+    public bool IsFavorite { get; set; }
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 

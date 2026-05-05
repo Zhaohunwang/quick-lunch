@@ -8,9 +8,13 @@ public class WorkspaceEntity
 
     public string? Description { get; set; }
 
+    public long? DefaultIdeId { get; set; }
+
     public bool AutoInheritTags { get; set; } = true;
 
     public string CustomTagsJson { get; set; } = "[]";
+
+    public bool IsFavorite { get; set; }
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 

@@ -31,6 +31,7 @@ public partial class AddProjectDialog : Window
                 {
                     viewModel.ProjectPath = folders[0].Path.LocalPath;
                     viewModel.PathTypeIndex = 0;
+                    viewModel.ProjectName = System.IO.Path.GetFileName(folders[0].Path.LocalPath);
                 }
             }
         }
@@ -53,6 +54,7 @@ public partial class AddProjectDialog : Window
                 {
                     viewModel.ProjectPath = files[0].Path.LocalPath;
                     viewModel.PathTypeIndex = 1;
+                    viewModel.ProjectName = System.IO.Path.GetFileNameWithoutExtension(files[0].Path.LocalPath);
                 }
             }
         }

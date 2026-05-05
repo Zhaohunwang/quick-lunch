@@ -3,11 +3,14 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="clr-namespace:ProjectHub.Desktop.ViewModels"
+        xmlns:icons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+        xmlns:micons="clr-namespace:Material.Icons;assembly=Material.Icons"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
         x:Class="ProjectHub.Desktop.Views.AddWorkspaceDialog"
         Title="{Binding DialogTitle}"
-        Width="800" Height="600"
-        MaxWidth="900" MaxHeight="700"
+        Width="800" Height="680"
+        MaxWidth="900" MaxHeight="780"
+        Icon="avares://ProjectHub.Desktop/Assets/app-icon.ico"
         WindowStartupLocation="CenterOwner"
         CanResize="False">
 
@@ -17,23 +20,48 @@
 
     <Grid RowDefinitions="Auto,*,Auto" Margin="20">
         <StackPanel Grid.Row="0" Spacing="16">
-            <TextBlock Text="工作区名称 *" FontWeight="SemiBold" />
+            <StackPanel Orientation="Horizontal" Spacing="6">
+                <icons:MaterialIcon Kind="BriefcaseOutline" Width="16" Height="16" VerticalAlignment="Center"/>
+                <TextBlock Text="工作区名称 *" FontWeight="SemiBold" VerticalAlignment="Center"/>
+            </StackPanel>
             <TextBox Text="{Binding WorkspaceName}" 
                      Watermark="输入工作区名称..."
                      MaxLength="100" />
             
-            <TextBlock Text="描述" FontWeight="SemiBold" />
+            <StackPanel Orientation="Horizontal" Spacing="6">
+                <icons:MaterialIcon Kind="Text" Width="16" Height="16" VerticalAlignment="Center"/>
+                <TextBlock Text="描述" FontWeight="SemiBold" VerticalAlignment="Center"/>
+            </StackPanel>
             <TextBox Text="{Binding Description}" 
                      Watermark="输入描述（可选）..."
                      AcceptsReturn="True"
                      TextWrapping="Wrap"
                      Height="80" />
+
+            <StackPanel Orientation="Horizontal" Spacing="6">
+                <icons:MaterialIcon Kind="MonitorDashboard" Width="16" Height="16" VerticalAlignment="Center"/>
+                <TextBlock Text="默认IDE（可选）" FontWeight="SemiBold" VerticalAlignment="Center"/>
+            </StackPanel>
+            <ComboBox ItemsSource="{Binding AvailableIdes}"
+                      SelectedItem="{Binding SelectedIde}"
+                      PlaceholderText="选择默认IDE..."
+                      HorizontalAlignment="Left"
+                      MinWidth="250">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding Name}" />
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+
+            <CheckBox Content="收藏工作区" IsChecked="{Binding IsFavorite}" Margin="0,4,0,0" />
         </StackPanel>
 
         <Grid Grid.Row="1" RowDefinitions="Auto,*,*" Margin="0,16,0,0">
-            <TextBlock Grid.Row="0" 
-                      Text="项目选择" 
-                      FontWeight="SemiBold" />
+            <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="6">
+                <icons:MaterialIcon Kind="FolderOutline" Width="16" Height="16" VerticalAlignment="Center"/>
+                <TextBlock Text="项目选择" FontWeight="SemiBold" VerticalAlignment="Center"/>
+            </StackPanel>
             
             <Grid Grid.Row="1" RowDefinitions="Auto,*" Margin="0,8,0,0">
                 <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="8">
@@ -45,18 +73,18 @@
                 </StackPanel>
                 
                 <Border Grid.Row="1" 
-                        BorderBrush="#E0E0E0" 
+                        BorderBrush="{DynamicResource App.CardBorderBrush}" 
                         BorderThickness="1" 
                         CornerRadius="4" 
                         Margin="0,8,0,0"
-                        Background="White">
+                        Background="{DynamicResource App.TextBoxBackgroundBrush}">
                     <ScrollViewer>
                         <ItemsControl ItemsSource="{Binding AvailableProjects}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
                                     <Button Padding="12,8" 
                                             Margin="4"
-                                            Background="#F8F9FA"
+                                            Background="{DynamicResource App.SurfaceSecondaryBrush}"
                                             CornerRadius="4"
                                             BorderThickness="0"
                                             Command="{Binding $parent[ItemsControl].((vm:AddWorkspaceDialogViewModel)DataContext).AddProjectCommand}"
@@ -68,7 +96,7 @@
                                             <TextBlock Grid.Column="1" 
                                                        Text="+" 
                                                        FontSize="16" 
-                                                       Foreground="#2196F3" 
+                                                       Foreground="{DynamicResource App.PrimaryBrush}" 
                                                        FontWeight="Bold" />
                                         </Grid>
                                     </Button>
@@ -80,23 +108,24 @@
             </Grid>
 
             <Grid Grid.Row="2" RowDefinitions="Auto,*" Margin="0,16,0,0">
-                <TextBlock Grid.Row="0" 
-                          Text="已选项目" 
-                          FontWeight="SemiBold" />
+                <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="6">
+                    <icons:MaterialIcon Kind="CheckCircleOutline" Width="16" Height="16" VerticalAlignment="Center"/>
+                    <TextBlock Text="已选项目" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                </StackPanel>
                 
                 <Border Grid.Row="1" 
-                        BorderBrush="#E0E0E0" 
+                        BorderBrush="{DynamicResource App.CardBorderBrush}" 
                         BorderThickness="1" 
                         CornerRadius="4" 
                         Margin="0,8,0,0"
-                        Background="White">
+                        Background="{DynamicResource App.TextBoxBackgroundBrush}">
                     <ScrollViewer>
                         <ItemsControl ItemsSource="{Binding SelectedProjects}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
                                     <Border Padding="12,8" 
                                             Margin="4"
-                                            Background="#E3F2FD"
+                                            Background="{DynamicResource App.NavigationActiveBackgroundBrush}"
                                             CornerRadius="4">
                                         <Grid ColumnDefinitions="*,Auto">
                                             <StackPanel Grid.Column="0" Spacing="2">
@@ -110,7 +139,7 @@
                                                     </ItemsControl.ItemsPanel>
                                                     <ItemsControl.ItemTemplate>
                                                         <DataTemplate>
-                                                            <Border Background="#2196F3" 
+                                                            <Border Background="{DynamicResource App.NavigationActiveIndicatorBrush}" 
                                                                     CornerRadius="12" 
                                                                     Padding="6,2"
                                                                     Margin="0,0,4,0">
@@ -125,7 +154,7 @@
                                             <Button Grid.Column="1" 
                                                     Content="×" 
                                                     FontSize="16" 
-                                                    Foreground="#e74c3c" 
+                                                    Foreground="{DynamicResource App.DangerBrush}" 
                                                     FontWeight="Bold"
                                                     Background="Transparent"
                                                     BorderThickness="0"
@@ -148,7 +177,7 @@
                     Spacing="8" 
                     Margin="0,20,0,0">
             <TextBlock Text="{Binding ErrorMessage}" 
-                       Foreground="#e74c3c" 
+                       Foreground="{DynamicResource App.DangerBrush}" 
                        VerticalAlignment="Center"
                        TextWrapping="Wrap" 
                        IsVisible="{Binding ErrorMessage, Converter={x:Static ObjectConverters.IsNotNull}}" />
@@ -157,7 +186,7 @@
                     Click="OnCancelClicked" />
             <Button Content="保存" 
                     Width="100" 
-                    Classes="Primary" 
+                    Classes="PrimaryButton" 
                     Click="OnSaveClicked" />
         </StackPanel>
     </Grid>

@@ -8,6 +8,7 @@
         Title="{Binding DialogTitle}"
         Width="500" Height="450"
         MaxWidth="600" MaxHeight="500"
+        Icon="avares://ProjectHub.Desktop/Assets/app-icon.ico"
         WindowStartupLocation="CenterOwner"
         CanResize="False">
 
@@ -24,7 +25,7 @@
             
             <TextBlock Text="标签颜色" FontWeight="SemiBold" />
             <StackPanel Spacing="12">
-                <TextBlock Text="预设颜色:" FontSize="12" Foreground="#6C757D" />
+                <TextBlock Text="预设颜色:" FontSize="12" Foreground="{DynamicResource App.SecondaryTextBrush}" />
                 <ItemsControl ItemsSource="{Binding AvailableColors}">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
@@ -46,7 +47,7 @@
                                         <Setter Property="Opacity" Value="0.8" />
                                     </Style>
                                     <Style Selector="Button.isselected">
-                                        <Setter Property="BorderBrush" Value="#2196F3" />
+                                        <Setter Property="BorderBrush" Value="{DynamicResource App.PrimaryBrush}" />
                                         <Setter Property="BorderThickness" Value="3" />
                                     </Style>
                                 </Button.Styles>
@@ -66,7 +67,7 @@
             </Border>
 
             <TextBlock Text="{Binding ErrorMessage}" 
-                       Foreground="#e74c3c" 
+                       Foreground="{DynamicResource App.DangerBrush}" 
                        TextWrapping="Wrap" 
                        IsVisible="{Binding ErrorMessage, Converter={x:Static ObjectConverters.IsNotNull}}" />
         </StackPanel>

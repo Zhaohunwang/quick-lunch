@@ -181,4 +181,82 @@ public partial class MainWindow : Window
             }
         }
     }
+
+    private void OnWorkspaceMoreOptionsClick(object? sender, RoutedEventArgs e)
+    {
+        if (sender is Button button && button.ContextMenu != null)
+        {
+            button.ContextMenu.DataContext = DataContext;
+
+            var workspace = button.Tag as Workspace;
+            if (workspace == null) return;
+
+            var contextMenu = button.ContextMenu;
+
+            contextMenu.Items.Clear();
+
+            InjectWorkspaceIdeSubMenu(contextMenu, workspace);
+
+            contextMenu.Items.Add(new Separator());
+
+            var editItem = new MenuItem
+            {
+                Header = "✏️ 编辑工作区",
+                Tag = workspace
+            };
+            editItem.Click += async (s, args) =>
+            {
+                if (DataContext is MainWindowViewModel vm)
+                    await vm.EditWorkspaceCommand.ExecuteAsync(workspace);
+            };
+            contextMenu.Items.Add(editItem);
+
+            var deleteItem = new MenuItem
+            {
+                Header = "🗑️ 删除工作区",
+                Tag = workspace
+            };
+            deleteItem.Click += async (s, args) =>
+            {
+                if (DataContext is MainWindowViewModel vm)
+                    await vm.DeleteWorkspaceCommand.ExecuteAsync(workspace);
+            };
+            contextMenu.Items.Add(deleteItem);
+
+            contextMenu.Open(button);
+        }
+    }
+
+    private void InjectWorkspaceIdeSubMenu(ContextMenu contextMenu, Workspace workspace)
+    {
+        if (DataContext is not MainWindowViewModel vm) return;
+
+        var defaultIde = vm.GetDefaultIdeTemplateForWorkspace(workspace);
+
+        var ideMenuItem = new MenuItem { Header = "💻 使用IDE打开" };
+
+        if (vm.AvailableIdes.Any())
+        {
+            foreach (var ide in vm.AvailableIdes)
+            {
+                var capturedIde = ide;
+                var isDefault = defaultIde?.Id == ide.Id;
+                var ideSubItem = new MenuItem
+                {
+                    Header = $"{ide.Icon ?? "💻"} {(isDefault ? "✓ " : "")}{ide.Name}"
+                };
+                ideSubItem.Click += async (s, args) =>
+                {
+                    await vm.LaunchWorkspaceWithIdeCommand.ExecuteAsync((workspace, capturedIde));
+                };
+                ideMenuItem.Items.Add(ideSubItem);
+            }
+        }
+        else
+        {
+            ideMenuItem.Items.Add(new MenuItem { Header = "(暂无IDE，请先配置)", IsEnabled = false });
+        }
+
+        contextMenu.Items.Add(ideMenuItem);
+    }
 }

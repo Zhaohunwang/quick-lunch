@@ -105,8 +105,10 @@ public class WorkspaceService : IWorkspaceService
 
         existingEntity.Name = workspace.Name;
         existingEntity.Description = workspace.Description;
+        existingEntity.DefaultIdeId = workspace.DefaultIdeId;
         existingEntity.AutoInheritTags = workspace.AutoInheritTags;
         existingEntity.CustomTagsJson = System.Text.Json.JsonSerializer.Serialize(workspace.CustomTags);
+        existingEntity.IsFavorite = workspace.IsFavorite;
         existingEntity.UpdatedAt = DateTime.UtcNow;
 
         var existingProjectLinks = existingEntity.WorkspaceProjects.ToList();
