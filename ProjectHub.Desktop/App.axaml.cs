@@ -65,8 +65,8 @@ public partial class App : Application
         {
             using var db = new AppDbContext();
             db.Database.EnsureCreated();
-            MigrateWorkspaceDefaultIdeId(db);
-            MigrateWorkspaceIsFavorite(db);
+            MigrateTables(db);
+            MigrateColumns(db);
             FileLogger.Info("Database initialized successfully");
         }
         catch (Exception ex)
@@ -75,47 +75,44 @@ public partial class App : Application
         }
     }
 
-    private static void MigrateWorkspaceDefaultIdeId(AppDbContext db)
+    private static bool TableExists(System.Data.Common.DbConnection conn, string tableName)
     {
-        try
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText = "SELECT name FROM sqlite_master WHERE type='table' AND name=$name";
+        var p = cmd.CreateParameter();
+        p.ParameterName = "$name";
+        p.Value = tableName;
+        cmd.Parameters.Add(p);
+        using var reader = cmd.ExecuteReader();
+        return reader.HasRows;
+    }
+
+    private static bool ColumnExists(System.Data.Common.DbConnection conn, string tableName, string columnName)
+    {
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText = $"PRAGMA table_info({tableName})";
+        using var reader = cmd.ExecuteReader();
+        while (reader.Read())
         {
-            var conn = db.Database.GetDbConnection();
-            if (conn.State != System.Data.ConnectionState.Open)
-                conn.Open();
-
-            bool hasColumn = false;
-            using (var cmd = conn.CreateCommand())
-            {
-                cmd.CommandText = "PRAGMA table_info(Workspaces)";
-                using var reader = cmd.ExecuteReader();
-                while (reader.Read())
-                {
-                    var name = reader.GetString(reader.GetOrdinal("name"));
-                    if (name == "DefaultIdeId")
-                    {
-                        hasColumn = true;
-                        break;
-                    }
-                }
-            }
-
-            if (!hasColumn)
-            {
-                using var alterCmd = conn.CreateCommand();
-                alterCmd.CommandText = "ALTER TABLE Workspaces ADD COLUMN DefaultIdeId INTEGER";
-                alterCmd.ExecuteNonQuery();
-                FileLogger.Info("Migration: Added DefaultIdeId column to Workspaces");
-            }
-
-            conn.Close();
+            var name = reader.GetString(reader.GetOrdinal("name"));
+            if (name == columnName)
+                return true;
         }
-        catch (Exception ex)
+        return false;
+    }
+
+    private static void EnsureColumn(System.Data.Common.DbConnection conn, string table, string column, string definition)
+    {
+        if (TableExists(conn, table) && !ColumnExists(conn, table, column))
         {
-            FileLogger.Error("Migration failed for DefaultIdeId", ex);
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = $"ALTER TABLE {table} ADD COLUMN {definition}";
+            cmd.ExecuteNonQuery();
+            FileLogger.Info($"Migration: Added {column} to {table}");
         }
     }
 
-    private static void MigrateWorkspaceIsFavorite(AppDbContext db)
+    private static void MigrateTables(AppDbContext db)
     {
         try
         {
@@ -123,35 +120,68 @@ public partial class App : Application
             if (conn.State != System.Data.ConnectionState.Open)
                 conn.Open();
 
-            bool hasColumn = false;
-            using (var cmd = conn.CreateCommand())
+            if (!TableExists(conn, "Tags"))
             {
-                cmd.CommandText = "PRAGMA table_info(Workspaces)";
-                using var reader = cmd.ExecuteReader();
-                while (reader.Read())
-                {
-                    var name = reader.GetString(reader.GetOrdinal("name"));
-                    if (name == "IsFavorite")
-                    {
-                        hasColumn = true;
-                        break;
-                    }
-                }
+                using var cmd = conn.CreateCommand();
+                cmd.CommandText = "CREATE TABLE Tags (Id INTEGER PRIMARY KEY AUTOINCREMENT, Name TEXT NOT NULL, Color TEXT, CONSTRAINT IX_Tags_Name UNIQUE (Name))";
+                cmd.ExecuteNonQuery();
+                FileLogger.Info("Migration: Created Tags table");
             }
 
-            if (!hasColumn)
+            if (!TableExists(conn, "ProjectTags"))
             {
-                using var alterCmd = conn.CreateCommand();
-                alterCmd.CommandText = "ALTER TABLE Workspaces ADD COLUMN IsFavorite INTEGER NOT NULL DEFAULT 0";
-                alterCmd.ExecuteNonQuery();
-                FileLogger.Info("Migration: Added IsFavorite column to Workspaces");
+                using var cmd = conn.CreateCommand();
+                cmd.CommandText = "CREATE TABLE ProjectTags (ProjectId INTEGER NOT NULL, TagId INTEGER NOT NULL, CONSTRAINT PK_ProjectTags PRIMARY KEY (ProjectId, TagId), CONSTRAINT FK_ProjectTags_Projects FOREIGN KEY (ProjectId) REFERENCES Projects(Id), CONSTRAINT FK_ProjectTags_Tags FOREIGN KEY (TagId) REFERENCES Tags(Id))";
+                cmd.ExecuteNonQuery();
+                FileLogger.Info("Migration: Created ProjectTags table");
+            }
+
+            if (!TableExists(conn, "WorkspaceProjects"))
+            {
+                using var cmd = conn.CreateCommand();
+                cmd.CommandText = "CREATE TABLE WorkspaceProjects (WorkspaceId INTEGER NOT NULL, ProjectId INTEGER NOT NULL, SortOrder INTEGER NOT NULL DEFAULT 0, CONSTRAINT PK_WorkspaceProjects PRIMARY KEY (WorkspaceId, ProjectId), CONSTRAINT FK_WorkspaceProjects_Workspaces FOREIGN KEY (WorkspaceId) REFERENCES Workspaces(Id), CONSTRAINT FK_WorkspaceProjects_Projects FOREIGN KEY (ProjectId) REFERENCES Projects(Id))";
+                cmd.ExecuteNonQuery();
+                FileLogger.Info("Migration: Created WorkspaceProjects table");
             }
 
             conn.Close();
         }
         catch (Exception ex)
         {
-            FileLogger.Error("Migration failed for IsFavorite", ex);
+            FileLogger.Error("Migration failed for table creation", ex);
+        }
+    }
+
+    private static void MigrateColumns(AppDbContext db)
+    {
+        try
+        {
+            var conn = db.Database.GetDbConnection();
+            if (conn.State != System.Data.ConnectionState.Open)
+                conn.Open();
+
+            EnsureColumn(conn, "Projects", "DefaultIdeId", "DefaultIdeId INTEGER");
+            EnsureColumn(conn, "Projects", "LastOpenedAt", "LastOpenedAt TEXT NOT NULL DEFAULT '0001-01-01 00:00:00'");
+            EnsureColumn(conn, "Projects", "OpenCount", "OpenCount INTEGER NOT NULL DEFAULT 0");
+            EnsureColumn(conn, "Projects", "IsFavorite", "IsFavorite INTEGER NOT NULL DEFAULT 0");
+            EnsureColumn(conn, "Projects", "CreatedAt", "CreatedAt TEXT NOT NULL DEFAULT '0001-01-01 00:00:00'");
+            EnsureColumn(conn, "Projects", "UpdatedAt", "UpdatedAt TEXT NOT NULL DEFAULT '0001-01-01 00:00:00'");
+
+            EnsureColumn(conn, "Workspaces", "DefaultIdeId", "DefaultIdeId INTEGER");
+            EnsureColumn(conn, "Workspaces", "AutoInheritTags", "AutoInheritTags INTEGER NOT NULL DEFAULT 1");
+            EnsureColumn(conn, "Workspaces", "CustomTagsJson", "CustomTagsJson TEXT NOT NULL DEFAULT '[]'");
+            EnsureColumn(conn, "Workspaces", "IsFavorite", "IsFavorite INTEGER NOT NULL DEFAULT 0");
+            EnsureColumn(conn, "Workspaces", "CreatedAt", "CreatedAt TEXT NOT NULL DEFAULT '0001-01-01 00:00:00'");
+            EnsureColumn(conn, "Workspaces", "UpdatedAt", "UpdatedAt TEXT NOT NULL DEFAULT '0001-01-01 00:00:00'");
+
+            EnsureColumn(conn, "IdeTemplates", "SupportedExtensionsJson", "SupportedExtensionsJson TEXT NOT NULL DEFAULT '[]'");
+            EnsureColumn(conn, "IdeTemplates", "Priority", "Priority INTEGER NOT NULL DEFAULT 0");
+
+            conn.Close();
+        }
+        catch (Exception ex)
+        {
+            FileLogger.Error("Migration failed for column migration", ex);
         }
     }
 

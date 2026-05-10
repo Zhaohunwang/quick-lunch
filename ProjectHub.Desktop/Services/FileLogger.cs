@@ -50,6 +50,24 @@ public static class FileLogger
         Debug.WriteLine(entry);
         Debug.Flush();
 
+        switch (level)
+        {
+            case "ERROR":
+            case "FATAL":
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine(entry);
+                Console.ResetColor();
+                break;
+            case "WARN":
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine(entry);
+                Console.ResetColor();
+                break;
+            default:
+                Console.WriteLine(entry);
+                break;
+        }
+
         lock (Lock)
         {
             try
