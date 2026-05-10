@@ -21,6 +21,7 @@
 | `11_project_operations.md` | 项目操作功能设计 |
 | `12_workspace_add_edit.md` | 工作区新增/编辑交互设计 |
 | `13_ide_settings.md` | IDE设置功能设计 |
+| `14_macos_packaging.md` | macOS 打包与分发方案 |
 
 ## 项目简介
 
@@ -55,6 +56,7 @@ Project Hub是一个跨平台的统一项目管理工具，用于管理多个IDE
 8. **工作区管理**：参考工作区新增/编辑交互设计文档实现工作区功能
 9. **IDE配置**：参考IDE设置功能设计文档实现IDE管理功能
 10. **主题系统**：参考交互设计文档中的主题系统设计章节实现 Light/Dark 主题切换
+11. **macOS 打包**：参考 macOS 打包与分发方案实现 macOS 平台应用打包、签名与公证
 
 ## 版本信息
 

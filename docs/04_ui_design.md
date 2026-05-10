@@ -522,7 +522,17 @@ Cog 设置
    - 基于 VS Code 的编辑器：Cursor、Windsurf、VSCodium、Trae 等
    - 命令格式：`<ide-exe> "<workspace-file-path>"`
 
-4. **临时文件管理：**
+4. **跨平台启动行为：**
+
+   | 平台 | IDE 类型 | 启动命令 |
+   |------|---------|---------|
+   | macOS | `.app` 包 | `open -a "/Applications/IDE.app" "<workspace-file-path>"` |
+   | macOS | CLI 工具 | `code "<workspace-file-path>"` |
+   | Linux | CLI 工具 | `code "<workspace-file-path>"` |
+   | Windows | 所有 | `Process.Start(ideExe, workspaceFilePath)` + `UseShellExecute` |
+
+   > **macOS 注意事项：** macOS 下 `.app` 包需要用 `open -a` 命令打开；CLI 工具（如 `code`）需将 `.code-workspace` 文件路径作为命令行参数传入，不能仅设为 `WorkingDirectory`。
+5. **临时文件管理：**
    - 文件存储在系统临时目录：`%TEMP%/ProjectHub/Workspaces/`
    - 文件名为工作区名称（特殊字符替换为下划线）+ `.code-workspace`
    - 每次打开时重新生成，确保反映最新的项目列表
