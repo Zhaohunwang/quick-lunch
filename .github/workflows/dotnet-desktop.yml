@@ -36,8 +36,10 @@ jobs:
         if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
           VERSION="${TAG#v}"
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "assembly_version=$VERSION" >> "$GITHUB_OUTPUT"
         else
           echo "version=1.0.0-dev" >> "$GITHUB_OUTPUT"
+          echo "assembly_version=1.0.0.0" >> "$GITHUB_OUTPUT"
         fi
 
     - name: Publish
@@ -50,7 +52,7 @@ jobs:
         -p:PublishSingleFile=true
         -p:UseAppHost=true
         -p:Version=${{ steps.version.outputs.version }}
-        -p:AssemblyVersion=${{ steps.version.outputs.version }}
+        -p:AssemblyVersion=${{ steps.version.outputs.assembly_version }}
 
     - name: Package as ZIP
       run: Compress-Archive -Path publish/win-x64/* -DestinationPath publish/${{ env.APP_NAME }}-${{ steps.version.outputs.version }}-win-x64.zip
@@ -89,8 +91,10 @@ jobs:
         if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
           VERSION="${TAG#v}"
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "assembly_version=$VERSION" >> "$GITHUB_OUTPUT"
         else
           echo "version=1.0.0-dev" >> "$GITHUB_OUTPUT"
+          echo "assembly_version=1.0.0.0" >> "$GITHUB_OUTPUT"
         fi
 
     - name: Publish
@@ -103,7 +107,7 @@ jobs:
         -p:PublishSingleFile=true
         -p:UseAppHost=true
         -p:Version=${{ steps.version.outputs.version }}
-        -p:AssemblyVersion=${{ steps.version.outputs.version }}
+        -p:AssemblyVersion=${{ steps.version.outputs.assembly_version }}
 
     - name: Create .app bundle
       run: |
