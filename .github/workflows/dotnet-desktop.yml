@@ -117,6 +117,9 @@ jobs:
 
         cp "$PUBLISH_DIR/"* "$BUNDLE_DIR/Contents/MacOS/"
 
+        cp "ProjectHub.Desktop/Assets/Icons/ProjectHub.icns" \
+           "$BUNDLE_DIR/Contents/Resources/ProjectHub.icns"
+
         cat > "$BUNDLE_DIR/Contents/Info.plist" << 'PLIST'
         <?xml version="1.0" encoding="UTF-8"?>
         <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -126,6 +129,7 @@ jobs:
             <key>CFBundleName</key><string>APP_PLACEHOLDER</string>
             <key>CFBundleDisplayName</key><string>APP_PLACEHOLDER</string>
             <key>CFBundleIdentifier</key><string>BUNDLEID_PLACEHOLDER</string>
+            <key>CFBundleIconFile</key><string>ProjectHub.icns</string>
             <key>CFBundleVersion</key><string>VERSION_PLACEHOLDER</string>
             <key>CFBundleShortVersionString</key><string>VERSION_PLACEHOLDER</string>
             <key>CFBundlePackageType</key><string>APPL</string>
