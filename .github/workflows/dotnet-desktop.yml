@@ -32,8 +32,9 @@ jobs:
       id: version
       shell: bash
       run: |
+        TAG="${{ github.ref_name }}"
         if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
-          VERSION="${{ github.ref_name#v }}"
+          VERSION="${TAG#v}"
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
         else
           echo "version=1.0.0-dev" >> "$GITHUB_OUTPUT"
@@ -84,8 +85,9 @@ jobs:
     - name: Get version
       id: version
       run: |
+        TAG="${{ github.ref_name }}"
         if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
-          VERSION="${{ github.ref_name#v }}"
+          VERSION="${TAG#v}"
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
         else
           echo "version=1.0.0-dev" >> "$GITHUB_OUTPUT"
