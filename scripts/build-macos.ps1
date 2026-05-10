@@ -300,7 +300,7 @@ function New-InfoPlist {
 </plist>
 "@
 
-    Set-Content -Path $PlistPath -Value $plistContent -Encoding UTF8
+    [System.IO.File]::WriteAllText($PlistPath, $plistContent, [System.Text.UTF8Encoding]::new($false))
     Write-Success "Info.plist generated (version: $AppVersion)"
 }
 
