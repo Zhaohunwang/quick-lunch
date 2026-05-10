@@ -1,0 +1,213 @@
+name: Build & Release
+
+on:
+  push:
+    branches: [ "master" ]
+    tags: [ "v*" ]
+  pull_request:
+    branches: [ "master" ]
+
+env:
+  DOTNET_VERSION: "8.0.x"
+  APP_NAME: "ProjectHub"
+  EXE_NAME: "ProjectHub.Desktop"
+  BUNDLE_ID: "com.projecthub.macos"
+
+jobs:
+
+  build-windows:
+    name: Windows Build
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+
+    - name: Get version
+      id: version
+      shell: bash
+      run: |
+        TAG="${{ github.ref_name }}"
+        if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
+          VERSION="${TAG#v}"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "assembly_version=$VERSION" >> "$GITHUB_OUTPUT"
+        else
+          echo "version=1.0.0-dev" >> "$GITHUB_OUTPUT"
+          echo "assembly_version=1.0.0.0" >> "$GITHUB_OUTPUT"
+        fi
+
+    - name: Publish
+      run: >
+        dotnet publish ProjectHub.Desktop/ProjectHub.Desktop.csproj
+        -r win-x64
+        -c Release
+        -o publish/win-x64
+        --self-contained
+        -p:PublishSingleFile=true
+        -p:UseAppHost=true
+        -p:Version=${{ steps.version.outputs.version }}
+        -p:AssemblyVersion=${{ steps.version.outputs.assembly_version }}
+
+    - name: Package as ZIP
+      run: Compress-Archive -Path publish/win-x64/* -DestinationPath publish/${{ env.APP_NAME }}-${{ steps.version.outputs.version }}-win-x64.zip
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ env.APP_NAME }}-Windows-x64
+        path: publish/${{ env.APP_NAME }}-${{ steps.version.outputs.version }}-win-x64.zip
+
+  build-macos:
+    name: macOS (${{ matrix.label }})
+    runs-on: macos-latest
+
+    strategy:
+      matrix:
+        include:
+          - rid: osx-x64
+            label: Intel
+          - rid: osx-arm64
+            label: Apple Silicon
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+
+    - name: Get version
+      id: version
+      run: |
+        TAG="${{ github.ref_name }}"
+        if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
+          VERSION="${TAG#v}"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "assembly_version=$VERSION" >> "$GITHUB_OUTPUT"
+        else
+          echo "version=1.0.0-dev" >> "$GITHUB_OUTPUT"
+          echo "assembly_version=1.0.0.0" >> "$GITHUB_OUTPUT"
+        fi
+
+    - name: Publish
+      run: >
+        dotnet publish ProjectHub.Desktop/ProjectHub.Desktop.csproj
+        -r ${{ matrix.rid }}
+        -c Release
+        -o publish/${{ matrix.rid }}
+        --self-contained
+        -p:PublishSingleFile=true
+        -p:UseAppHost=true
+        -p:Version=${{ steps.version.outputs.version }}
+        -p:AssemblyVersion=${{ steps.version.outputs.assembly_version }}
+
+    - name: Create .app bundle
+      run: |
+        VERSION="${{ steps.version.outputs.version }}"
+        APP="${{ env.APP_NAME }}"
+        EXE="${{ env.EXE_NAME }}"
+        BUNDLE_ID="${{ env.BUNDLE_ID }}"
+        PUBLISH_DIR="publish/${{ matrix.rid }}"
+        BUNDLE_DIR="publish/${APP}.app"
+
+        mkdir -p "$BUNDLE_DIR/Contents/MacOS"
+        mkdir -p "$BUNDLE_DIR/Contents/Resources"
+
+        cp "$PUBLISH_DIR/"* "$BUNDLE_DIR/Contents/MacOS/"
+
+        cp "ProjectHub.Desktop/Assets/Icons/ProjectHub.icns" \
+           "$BUNDLE_DIR/Contents/Resources/ProjectHub.icns"
+
+        cat > "$BUNDLE_DIR/Contents/Info.plist" << 'PLIST'
+        <?xml version="1.0" encoding="UTF-8"?>
+        <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+        <plist version="1.0">
+        <dict>
+            <key>CFBundleExecutable</key><string>EXE_PLACEHOLDER</string>
+            <key>CFBundleName</key><string>APP_PLACEHOLDER</string>
+            <key>CFBundleDisplayName</key><string>APP_PLACEHOLDER</string>
+            <key>CFBundleIdentifier</key><string>BUNDLEID_PLACEHOLDER</string>
+            <key>CFBundleIconFile</key><string>ProjectHub.icns</string>
+            <key>CFBundleVersion</key><string>VERSION_PLACEHOLDER</string>
+            <key>CFBundleShortVersionString</key><string>VERSION_PLACEHOLDER</string>
+            <key>CFBundlePackageType</key><string>APPL</string>
+            <key>CFBundleInfoDictionaryVersion</key><string>6.0</string>
+            <key>LSMinimumSystemVersion</key><string>12.0</string>
+            <key>NSHighResolutionCapable</key><true/>
+            <key>LSApplicationCategoryType</key><string>public.app-category.developer-tools</string>
+        </dict>
+        </plist>
+        PLIST
+
+        sed -i '' \
+          -e "s/EXE_PLACEHOLDER/${EXE}/g" \
+          -e "s/APP_PLACEHOLDER/${APP}/g" \
+          -e "s/BUNDLEID_PLACEHOLDER/${BUNDLE_ID}/g" \
+          -e "s/VERSION_PLACEHOLDER/${VERSION}/g" \
+          "$BUNDLE_DIR/Contents/Info.plist"
+
+        chmod +x "$BUNDLE_DIR/Contents/MacOS/"*
+
+    - name: Ad-hoc sign
+      run: codesign --force --deep --sign - publish/${{ env.APP_NAME }}.app
+
+    - name: Create DMG
+      run: |
+        VERSION="${{ steps.version.outputs.version }}"
+        APP="${{ env.APP_NAME }}"
+        RID="${{ matrix.rid }}"
+
+        STAGING="publish/dmg-staging"
+        mkdir -p "$STAGING"
+        cp -a "publish/${APP}.app" "$STAGING/"
+        ln -s /Applications "$STAGING/Applications"
+
+        hdiutil create \
+          -volname "$APP" \
+          -srcfolder "$STAGING" \
+          -ov \
+          -format UDZO \
+          "publish/${APP}-${VERSION}-${RID}.dmg"
+
+        rm -rf "$STAGING"
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ env.APP_NAME }}-macOS-${{ matrix.rid }}
+        path: publish/${{ env.APP_NAME }}-${{ steps.version.outputs.version }}-${{ matrix.rid }}.dmg
+
+  release:
+    name: Create Release
+    needs: [build-windows, build-macos]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+
+    permissions:
+      contents: write
+
+    steps:
+    - name: Download all artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: artifacts
+
+    - name: List artifacts
+      run: find artifacts -type f
+
+    - name: Create GitHub release
+      uses: softprops/action-gh-release@v2
+      with:
+        draft: true
+        generate_release_notes: true
+        files: |
+          artifacts/**/*.zip
+          artifacts/**/*.dmg
