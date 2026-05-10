@@ -63,24 +63,56 @@ public class WorkspaceLauncherService : IWorkspaceLauncherService
     {
         try
         {
+            ProcessStartInfo processInfo;
+
             var arguments = fileToOpen != null
                 ? $"\"{fileToOpen}\" {args ?? string.Empty}".Trim()
                 : args ?? string.Empty;
 
-            var processInfo = new ProcessStartInfo
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
-                FileName = executablePath,
-                Arguments = arguments,
-                UseShellExecute = true
-            };
+                if (executablePath.EndsWith(".app") || Directory.Exists(executablePath))
+                {
+                    var openArgs = $"-a \"{executablePath}\"";
+                    if (fileToOpen != null)
+                        openArgs += $" \"{fileToOpen}\"";
+                    if (!string.IsNullOrEmpty(args))
+                        openArgs += $" {args}";
 
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                    processInfo = new ProcessStartInfo
+                    {
+                        FileName = "open",
+                        Arguments = openArgs.Trim(),
+                        UseShellExecute = false,
+                        CreateNoWindow = true
+                    };
+                }
+                else
+                {
+                    processInfo = new ProcessStartInfo
+                    {
+                        FileName = executablePath,
+                        Arguments = arguments,
+                        UseShellExecute = false
+                    };
+                }
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
                 processInfo = new ProcessStartInfo
                 {
                     FileName = executablePath,
                     Arguments = arguments,
                     UseShellExecute = false
+                };
+            }
+            else
+            {
+                processInfo = new ProcessStartInfo
+                {
+                    FileName = executablePath,
+                    Arguments = arguments,
+                    UseShellExecute = true
                 };
             }
 

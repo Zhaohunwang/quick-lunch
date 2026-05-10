@@ -1,0 +1,48 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="ProjectHub.Desktop.Views.AboutWindow"
+        Title="About ProjectHub"
+        Width="320" Height="280"
+        MinWidth="320" MinHeight="280"
+        MaxWidth="320" MaxHeight="280"
+        Icon="avares://ProjectHub.Desktop/Assets/app-icon.ico"
+        WindowStartupLocation="CenterOwner"
+        CanResize="False"
+        ShowInTaskbar="False">
+
+    <Grid RowDefinitions="Auto,*,Auto" Margin="24,20">
+        <StackPanel Grid.Row="0" Spacing="8" HorizontalAlignment="Center">
+            <Image Source="avares://ProjectHub.Desktop/Assets/app-icon.ico"
+                   Width="48" Height="48"
+                   HorizontalAlignment="Center" />
+            <TextBlock Text="Project Hub"
+                       FontSize="18" FontWeight="SemiBold"
+                       HorizontalAlignment="Center"
+                       Foreground="{DynamicResource App.PrimaryTextBrush}" />
+            <TextBlock x:Name="VersionText"
+                       FontSize="12"
+                       HorizontalAlignment="Center"
+                       Foreground="{DynamicResource App.SecondaryTextBrush}" />
+        </StackPanel>
+
+        <StackPanel Grid.Row="1" Spacing="8" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <Separator Background="{DynamicResource App.BorderBrush}" />
+            <TextBlock Text="一个跨平台的统一项目管理工具"
+                       FontSize="12"
+                       HorizontalAlignment="Center"
+                       TextWrapping="Wrap"
+                       Foreground="{DynamicResource App.SecondaryTextBrush}" />
+            <TextBlock x:Name="TechInfoText"
+                       FontSize="11"
+                       HorizontalAlignment="Center"
+                       Foreground="{DynamicResource App.SecondaryTextBrush}" />
+            <Separator Background="{DynamicResource App.BorderBrush}" />
+        </StackPanel>
+
+        <TextBlock Grid.Row="2"
+                   x:Name="CopyrightText"
+                   FontSize="11"
+                   HorizontalAlignment="Center"
+                   Foreground="{DynamicResource App.SecondaryTextBrush}" />
+    </Grid>
+</Window>

@@ -4,8 +4,10 @@ using ProjectHub.Core.Models;
 using ProjectHub.Core.Services;
 using ProjectHub.Desktop.Services;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
 namespace ProjectHub.Desktop.ViewModels
@@ -128,14 +130,36 @@ namespace ProjectHub.Desktop.ViewModels
         [RelayCommand]
         private async Task BrowseIdePath()
         {
+            var filters = new List<Avalonia.Controls.FileDialogFilter>();
+            var isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+
+            if (isWindows)
+            {
+                filters.Add(new Avalonia.Controls.FileDialogFilter
+                {
+                    Name = "可执行文件",
+                    Extensions = new List<string> { "exe", "bat", "cmd" }.ToList()
+                });
+            }
+            else
+            {
+                filters.Add(new Avalonia.Controls.FileDialogFilter
+                {
+                    Name = "所有文件",
+                    Extensions = new List<string> { "*" }.ToList()
+                });
+            }
+
+            filters.Add(new Avalonia.Controls.FileDialogFilter
+            {
+                Name = "所有文件",
+                Extensions = new List<string> { "*" }.ToList()
+            });
+
             var dialog = new Avalonia.Controls.OpenFileDialog
             {
                 Title = "选择IDE可执行文件",
-                Filters = new System.Collections.Generic.List<Avalonia.Controls.FileDialogFilter>
-                {
-                    new Avalonia.Controls.FileDialogFilter { Name = "可执行文件", Extensions = new System.Collections.Generic.List<string> { "exe" } },
-                    new Avalonia.Controls.FileDialogFilter { Name = "所有文件", Extensions = new System.Collections.Generic.List<string> { "*" } }
-                }
+                Filters = filters
             };
 
             var mainWindow = App.Current?.ApplicationLifetime is Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime desktop
@@ -168,7 +192,7 @@ namespace ProjectHub.Desktop.ViewModels
                 return false;
             }
 
-            if (!System.IO.File.Exists(NewIdePath))
+            if (!System.IO.File.Exists(NewIdePath) && !System.IO.Directory.Exists(NewIdePath))
             {
                 ErrorMessage = "IDE路径不存在";
                 return false;

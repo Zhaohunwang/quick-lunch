@@ -1,1 +1,167 @@
-{"$schema": "https://json-schema.org/draft/2020-12/schema", "$comment": "IDE自动检测规则配置。用户可在 %AppData%/ProjectHub/ide_detection.json 覆盖或扩展此文件", "ides": [{"id": "vscode", "name": "VS Code", "exeName": "code.exe", "icon": "🆚", "priority": 1, "defaultArgs": "", "searchPaths": ["%ProgramFiles%\\Microsoft VS Code", "%LocalAppData%\\Programs\\Microsoft VS Code"], "supportedExtensions": [".cs", ".ts", ".js", ".py", ".java", ".go", ".rs", ".vue", ".html", ".css"]}, {"id": "cursor", "name": "Cursor", "exeName": "cursor.exe", "icon": "🖱️", "priority": 2, "defaultArgs": "", "searchPaths": ["%LocalAppData%\\Programs\\cursor", "%LocalAppData%\\cursor-user", "%ProgramFiles%\\cursor"], "supportedExtensions": [".cs", ".ts", ".js", ".py", ".java", ".go", ".rs", ".vue", ".html", ".css"]}, {"id": "windsurf", "name": "Windsurf", "exeName": "Windsurf.exe", "icon": "🌊", "priority": 3, "defaultArgs": "", "searchPaths": ["%LocalAppData%\\Programs\\Windsurf", "%ProgramFiles%\\Windsurf"], "supportedExtensions": [".cs", ".ts", ".js", ".py", ".java", ".go", ".rs", ".vue", ".html", ".css"]}, {"id": "vscodium", "name": "VSCodium", "exeName": "codium.exe", "icon": "📦", "priority": 4, "defaultArgs": "", "searchPaths": ["%ProgramFiles%\\VSCodium", "%LocalAppData%\\Programs\\VSCodium", "%LocalAppData%\\VSCodium"], "supportedExtensions": [".cs", ".ts", ".js", ".py", ".java", ".go", ".rs", ".vue", ".html", ".css"]}, {"id": "trae", "name": "Trae", "exeName": "Trae.exe", "icon": "🤖", "priority": 5, "defaultArgs": "", "searchPaths": ["%LocalAppData%\\Trae", "%ProgramFiles%\\Trae"], "supportedExtensions": [".cs", ".ts", ".js", ".py", ".java", ".vue", ".html", ".css"]}, {"id": "trae-cn", "name": "Trae-CN", "exeName": "Trae.exe", "icon": "🤖", "priority": 6, "defaultArgs": "", "searchPaths": ["%LocalAppData%\\Trae CN", "%ProgramFiles%\\Trae CN"], "supportedExtensions": [".cs", ".ts", ".js", ".py", ".java", ".vue", ".html", ".css"]}]}
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$comment": "IDE自动检测规则配置。用户可在 ~/.config/ProjectHub/ide_detection.json (macOS/Linux) 或 %AppData%/ProjectHub/ide_detection.json (Windows) 覆盖或扩展此文件",
+  "ides": [
+    {
+      "id": "vscode",
+      "name": "VS Code",
+      "exeName": {
+        "windows": "code.exe",
+        "macOS": "code",
+        "linux": "code"
+      },
+      "searchPaths": {
+        "windows": [
+          "%ProgramFiles%\\Microsoft VS Code",
+          "%LocalAppData%\\Programs\\Microsoft VS Code"
+        ],
+        "macOS": [
+          "/Applications/Visual Studio Code.app/Contents/Resources/app/bin"
+        ],
+        "linux": [
+          "/usr/share/code",
+          "/snap/code/current/usr/share/code",
+          "/usr/lib/code"
+        ]
+      },
+      "icon": "🆚",
+      "priority": 1,
+      "defaultArgs": "",
+      "supportedExtensions": [".cs", ".ts", ".js", ".py", ".java", ".go", ".rs", ".vue", ".html", ".css"]
+    },
+    {
+      "id": "cursor",
+      "name": "Cursor",
+      "exeName": {
+        "windows": "cursor.exe",
+        "macOS": "cursor",
+        "linux": "cursor"
+      },
+      "searchPaths": {
+        "windows": [
+          "%LocalAppData%\\Programs\\cursor",
+          "%LocalAppData%\\cursor-user",
+          "%ProgramFiles%\\cursor"
+        ],
+        "macOS": [
+          "/Applications/Cursor.app/Contents/Resources/app/bin"
+        ],
+        "linux": [
+          "/usr/share/cursor",
+          "/opt/Cursor/resources/app/bin"
+        ]
+      },
+      "icon": "🖱️",
+      "priority": 2,
+      "defaultArgs": "",
+      "supportedExtensions": [".cs", ".ts", ".js", ".py", ".java", ".go", ".rs", ".vue", ".html", ".css"]
+    },
+    {
+      "id": "windsurf",
+      "name": "Windsurf",
+      "exeName": {
+        "windows": "Windsurf.exe",
+        "macOS": "windsurf",
+        "linux": "windsurf"
+      },
+      "searchPaths": {
+        "windows": [
+          "%LocalAppData%\\Programs\\Windsurf",
+          "%ProgramFiles%\\Windsurf"
+        ],
+        "macOS": [
+          "/Applications/Windsurf.app/Contents/Resources/app/bin"
+        ],
+        "linux": [
+          "/usr/share/windsurf",
+          "/opt/Windsurf/resources/app/bin"
+        ]
+      },
+      "icon": "🌊",
+      "priority": 3,
+      "defaultArgs": "",
+      "supportedExtensions": [".cs", ".ts", ".js", ".py", ".java", ".go", ".rs", ".vue", ".html", ".css"]
+    },
+    {
+      "id": "vscodium",
+      "name": "VSCodium",
+      "exeName": {
+        "windows": "codium.exe",
+        "macOS": "codium",
+        "linux": "codium"
+      },
+      "searchPaths": {
+        "windows": [
+          "%ProgramFiles%\\VSCodium",
+          "%LocalAppData%\\Programs\\VSCodium",
+          "%LocalAppData%\\VSCodium"
+        ],
+        "macOS": [
+          "/Applications/VSCodium.app/Contents/Resources/app/bin",
+          "/usr/local/bin/codium"
+        ],
+        "linux": [
+          "/usr/share/codium",
+          "/snap/codium/current/usr/share/codium",
+          "/usr/lib/codium"
+        ]
+      },
+      "icon": "📦",
+      "priority": 4,
+      "defaultArgs": "",
+      "supportedExtensions": [".cs", ".ts", ".js", ".py", ".java", ".go", ".rs", ".vue", ".html", ".css"]
+    },
+    {
+      "id": "trae",
+      "name": "Trae",
+      "exeName": {
+        "windows": "Trae.exe",
+        "macOS": "trae",
+        "linux": "trae"
+      },
+      "searchPaths": {
+        "windows": [
+          "%LocalAppData%\\Trae",
+          "%ProgramFiles%\\Trae"
+        ],
+        "macOS": [
+          "/Applications/Trae.app/Contents/Resources/app/bin"
+        ],
+        "linux": [
+          "/usr/share/trae",
+          "/opt/Trae/resources/app/bin"
+        ]
+      },
+      "icon": "🤖",
+      "priority": 5,
+      "defaultArgs": "",
+      "supportedExtensions": [".cs", ".ts", ".js", ".py", ".java", ".vue", ".html", ".css"]
+    },
+    {
+      "id": "trae-cn",
+      "name": "Trae-CN",
+      "exeName": {
+        "windows": "Trae.exe",
+        "macOS": "trae-cn",
+        "linux": "trae-cn"
+      },
+      "searchPaths": {
+        "windows": [
+          "%LocalAppData%\\Trae CN",
+          "%ProgramFiles%\\Trae CN"
+        ],
+        "macOS": [
+          "/Applications/Trae CN.app/Contents/Resources/app/bin"
+        ],
+        "linux": [
+          "/usr/share/trae-cn",
+          "/opt/Trae CN/resources/app/bin"
+        ]
+      },
+      "icon": "🤖",
+      "priority": 6,
+      "defaultArgs": "",
+      "supportedExtensions": [".cs", ".ts", ".js", ".py", ".java", ".vue", ".html", ".css"]
+    }
+  ]
+}

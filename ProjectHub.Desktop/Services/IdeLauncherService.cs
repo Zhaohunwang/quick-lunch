@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text.Json;
@@ -71,7 +72,15 @@ public class IdeLauncherService : IIdeLauncherService
     public async Task AddIdeTemplateAsync(IdeTemplate template)
     {
         using var db = _contextFactory();
-        var entity = template.ToEntity();
+        var entity = new IdeTemplateEntity
+        {
+            Name = template.Name,
+            ExecutablePath = template.ExecutablePath,
+            DefaultArgs = template.DefaultArgs,
+            Icon = template.Icon,
+            Priority = template.Priority,
+            SupportedExtensionsJson = System.Text.Json.JsonSerializer.Serialize(template.SupportedExtensions)
+        };
         db.IdeTemplates.Add(entity);
         await db.SaveChangesAsync();
         template.Id = entity.Id;
@@ -108,22 +117,64 @@ public class IdeLauncherService : IIdeLauncherService
     {
         try
         {
-            var processInfo = new ProcessStartInfo
-            {
-                FileName = executablePath,
-                Arguments = args ?? string.Empty,
-                WorkingDirectory = workingDirectory ?? string.Empty,
-                UseShellExecute = true
-            };
+            ProcessStartInfo processInfo;
 
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
-                var gioCmd = $"\"{executablePath}\" \"{workingDirectory}\"";
+                if (executablePath.EndsWith(".app") || Directory.Exists(executablePath))
+                {
+                    var arguments = string.IsNullOrEmpty(args) ? "" : $" {args}";
+                    processInfo = new ProcessStartInfo
+                    {
+                        FileName = "open",
+                        Arguments = $"-a \"{executablePath}\"{(string.IsNullOrEmpty(workingDirectory) ? "" : $" \"{workingDirectory}\"")}{arguments}",
+                        UseShellExecute = false,
+                        CreateNoWindow = true
+                    };
+                }
+                else
+                {
+                    var launchArgs = args ?? string.Empty;
+                    if (!string.IsNullOrEmpty(workingDirectory))
+                        launchArgs = $"{launchArgs} \"{workingDirectory}\"".Trim();
+
+                    processInfo = new ProcessStartInfo
+                    {
+                        FileName = executablePath,
+                        Arguments = launchArgs,
+                        UseShellExecute = false
+                    };
+                }
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                if (!string.IsNullOrEmpty(workingDirectory) && File.Exists(executablePath))
+                {
+                    processInfo = new ProcessStartInfo
+                    {
+                        FileName = executablePath,
+                        Arguments = $"{args ?? string.Empty} \"{workingDirectory}\"".Trim(),
+                        UseShellExecute = false
+                    };
+                }
+                else
+                {
+                    processInfo = new ProcessStartInfo
+                    {
+                        FileName = "gio",
+                        Arguments = $"open \"{workingDirectory}\"",
+                        UseShellExecute = false
+                    };
+                }
+            }
+            else
+            {
                 processInfo = new ProcessStartInfo
                 {
-                    FileName = "gio",
-                    Arguments = $"open \"{workingDirectory}\"",
-                    UseShellExecute = false
+                    FileName = executablePath,
+                    Arguments = args ?? string.Empty,
+                    WorkingDirectory = workingDirectory ?? string.Empty,
+                    UseShellExecute = true
                 };
             }
 

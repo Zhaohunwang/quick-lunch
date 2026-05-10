@@ -64,10 +64,12 @@ public partial class App : Application
         try
         {
             using var db = new AppDbContext();
+            var conn = db.Database.GetDbConnection();
+            Console.WriteLine($"[DB] Database path: {conn.DataSource}");
             db.Database.EnsureCreated();
             MigrateTables(db);
             MigrateColumns(db);
-            FileLogger.Info("Database initialized successfully");
+            FileLogger.Info($"Database initialized successfully: {conn.DataSource}");
         }
         catch (Exception ex)
         {
@@ -97,6 +99,23 @@ public partial class App : Application
             var name = reader.GetString(reader.GetOrdinal("name"));
             if (name == columnName)
                 return true;
+        }
+        return false;
+    }
+
+    private static bool IsIdAutoincrement(System.Data.Common.DbConnection conn, string tableName)
+    {
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText = $"PRAGMA table_info({tableName})";
+        using var reader = cmd.ExecuteReader();
+        while (reader.Read())
+        {
+            var name = reader.GetString(reader.GetOrdinal("name"));
+            if (name == "Id")
+            {
+                var pk = reader.GetInt64(reader.GetOrdinal("pk"));
+                return pk == 1;
+            }
         }
         return false;
     }
@@ -142,6 +161,32 @@ public partial class App : Application
                 cmd.CommandText = "CREATE TABLE WorkspaceProjects (WorkspaceId INTEGER NOT NULL, ProjectId INTEGER NOT NULL, SortOrder INTEGER NOT NULL DEFAULT 0, CONSTRAINT PK_WorkspaceProjects PRIMARY KEY (WorkspaceId, ProjectId), CONSTRAINT FK_WorkspaceProjects_Workspaces FOREIGN KEY (WorkspaceId) REFERENCES Workspaces(Id), CONSTRAINT FK_WorkspaceProjects_Projects FOREIGN KEY (ProjectId) REFERENCES Projects(Id))";
                 cmd.ExecuteNonQuery();
                 FileLogger.Info("Migration: Created WorkspaceProjects table");
+            }
+
+            if (TableExists(conn, "IdeTemplates") && !IsIdAutoincrement(conn, "IdeTemplates"))
+            {
+                using var cmd = conn.CreateCommand();
+                cmd.CommandText = "SELECT sql FROM sqlite_master WHERE type='table' AND name='IdeTemplates'";
+                var existingSql = cmd.ExecuteScalar() as string;
+                if (existingSql != null && !existingSql.Contains("AUTOINCREMENT"))
+                {
+                    cmd.CommandText = $"ALTER TABLE IdeTemplates RENAME TO IdeTemplates_old";
+                    cmd.ExecuteNonQuery();
+                    cmd.CommandText = "CREATE TABLE IdeTemplates (Id INTEGER PRIMARY KEY AUTOINCREMENT, Name TEXT NOT NULL, ExecutablePath TEXT NOT NULL, DefaultArgs TEXT, Icon TEXT, SupportedExtensionsJson TEXT NOT NULL DEFAULT '[]', Priority INTEGER NOT NULL DEFAULT 0)";
+                    cmd.ExecuteNonQuery();
+                    cmd.CommandText = "INSERT INTO IdeTemplates (Id, Name, ExecutablePath, DefaultArgs, Icon, SupportedExtensionsJson, Priority) SELECT Id, Name, ExecutablePath, DefaultArgs, Icon, SupportedExtensionsJson, Priority FROM IdeTemplates_old";
+                    cmd.ExecuteNonQuery();
+                    cmd.CommandText = "DROP TABLE IdeTemplates_old";
+                    cmd.ExecuteNonQuery();
+                    FileLogger.Info("Migration: Rebuilt IdeTemplates table with AUTOINCREMENT");
+                }
+            }
+            else if (!TableExists(conn, "IdeTemplates"))
+            {
+                using var cmd = conn.CreateCommand();
+                cmd.CommandText = "CREATE TABLE IdeTemplates (Id INTEGER PRIMARY KEY AUTOINCREMENT, Name TEXT NOT NULL, ExecutablePath TEXT NOT NULL, DefaultArgs TEXT, Icon TEXT, SupportedExtensionsJson TEXT NOT NULL DEFAULT '[]', Priority INTEGER NOT NULL DEFAULT 0)";
+                cmd.ExecuteNonQuery();
+                FileLogger.Info("Migration: Created IdeTemplates table");
             }
 
             conn.Close();
@@ -207,5 +252,14 @@ public partial class App : Application
     {
         var quickLauncher = Services.GetRequiredService<QuickLauncherWindow>();
         quickLauncher.Show();
+    }
+
+    private void About_OnClick(object? sender, EventArgs e)
+    {
+        if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+        {
+            var aboutWindow = new AboutWindow();
+            aboutWindow.ShowDialog(desktop.MainWindow!);
+        }
     }
 }

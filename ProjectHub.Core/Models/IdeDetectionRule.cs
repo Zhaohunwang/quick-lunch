@@ -8,9 +8,9 @@ namespace ProjectHub.Core.Models
 
         public string Name { get; set; } = string.Empty;
 
-        public string ExeName { get; set; } = string.Empty;
+        public PlatformValue ExeName { get; set; } = new();
 
-        public List<string> SearchPaths { get; set; } = new();
+        public PlatformPaths SearchPaths { get; set; } = new();
 
         public string? Icon { get; set; }
 
@@ -19,5 +19,23 @@ namespace ProjectHub.Core.Models
         public string? DefaultArgs { get; set; }
 
         public List<string> SupportedExtensions { get; set; } = new();
+    }
+
+    public class PlatformValue
+    {
+        public string? Windows { get; set; }
+
+        public string? MacOS { get; set; }
+
+        public string? Linux { get; set; }
+    }
+
+    public class PlatformPaths
+    {
+        public List<string> Windows { get; set; } = new();
+
+        public List<string> MacOS { get; set; } = new();
+
+        public List<string> Linux { get; set; } = new();
     }
 }

@@ -4,7 +4,14 @@
              xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
              xmlns:semi="https://irihi.tech/semi"
              x:Class="ProjectHub.Desktop.App"
+             Name="ProjectHub"
              RequestedThemeVariant="Default">
+
+    <NativeMenu.Menu>
+        <NativeMenu>
+            <NativeMenuItem Header="About ProjectHub..." Click="About_OnClick" />
+        </NativeMenu>
+    </NativeMenu.Menu>
 
     <Application.Styles>
         <semi:SemiTheme Locale="zh-CN" />
