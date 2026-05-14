@@ -49,100 +49,115 @@
 
         <!-- 左侧导航栏 -->
         <Border Grid.Column="0" Background="{DynamicResource App.SidebarBackgroundBrush}" BorderBrush="{DynamicResource App.BorderBrush}" BorderThickness="0,0,1,0">
-            <ScrollViewer>
-                <StackPanel Margin="8">
-                    <!-- 项目分组 -->
-                    <TextBlock Text="项目" FontWeight="SemiBold" FontSize="12" Foreground="{DynamicResource App.SecondaryTextBrush}" Margin="8,8,8,4" />
-                    <ToggleButton Name="AllProjectsButton"
-                            Classes="NavigationButton"
-                            IsChecked="{Binding IsAllSelected}"
-                            Command="{Binding ShowAllProjectsCommand}">
-                        <StackPanel Orientation="Horizontal" Spacing="8">
-                            <icons:MaterialIcon Kind="FolderOpen" Width="16" Height="16" />
-                            <TextBlock Text="{Binding AllProjectsText}" VerticalAlignment="Center" />
-                        </StackPanel>
-                    </ToggleButton>
-                    <ToggleButton Name="FavoriteProjectsButton"
-                            Classes="NavigationButton"
-                            IsChecked="{Binding IsFavoriteSelected}"
-                            Command="{Binding ShowFavoriteProjectsCommand}">
-                        <StackPanel Orientation="Horizontal" Spacing="8">
-                            <icons:MaterialIcon Kind="Star" Width="16" Height="16" />
-                            <TextBlock Text="{Binding FavoriteProjectsText}" VerticalAlignment="Center" />
-                        </StackPanel>
-                    </ToggleButton>
-                    <ToggleButton Name="RecentProjectsButton"
-                            Classes="NavigationButton"
-                            IsChecked="{Binding IsRecentSelected}"
-                            Command="{Binding ShowRecentProjectsCommand}">
-                        <StackPanel Orientation="Horizontal" Spacing="8">
-                            <icons:MaterialIcon Kind="ClockOutline" Width="16" Height="16" />
-                            <TextBlock Text="{Binding RecentProjectsText}" VerticalAlignment="Center" />
-                        </StackPanel>
-                    </ToggleButton>
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
 
-                    <!-- 分隔线 -->
-                    <Separator Margin="8,12,8,12" Background="{DynamicResource App.BorderBrush}" />
+                <ScrollViewer Grid.Row="0">
+                    <StackPanel Margin="8">
+                        <!-- 项目分组 -->
+                        <TextBlock Text="项目" FontWeight="SemiBold" FontSize="12" Foreground="{DynamicResource App.SecondaryTextBrush}" Margin="8,8,8,4" />
+                        <ToggleButton Name="AllProjectsButton"
+                                Classes="NavigationButton"
+                                IsChecked="{Binding IsAllSelected}"
+                                Command="{Binding ShowAllProjectsCommand}">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <icons:MaterialIcon Kind="FolderOpen" Width="16" Height="16" />
+                                <TextBlock Text="{Binding AllProjectsText}" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </ToggleButton>
+                        <ToggleButton Name="FavoriteProjectsButton"
+                                Classes="NavigationButton"
+                                IsChecked="{Binding IsFavoriteSelected}"
+                                Command="{Binding ShowFavoriteProjectsCommand}">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <icons:MaterialIcon Kind="Star" Width="16" Height="16" />
+                                <TextBlock Text="{Binding FavoriteProjectsText}" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </ToggleButton>
+                        <ToggleButton Name="RecentProjectsButton"
+                                Classes="NavigationButton"
+                                IsChecked="{Binding IsRecentSelected}"
+                                Command="{Binding ShowRecentProjectsCommand}">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <icons:MaterialIcon Kind="ClockOutline" Width="16" Height="16" />
+                                <TextBlock Text="{Binding RecentProjectsText}" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </ToggleButton>
 
-                    <!-- 标签分组 -->
-                    <Grid Margin="8,8,8,4">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-                        <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="6">
-                            <icons:MaterialIcon Kind="Tag" Width="14" Height="14" Foreground="{DynamicResource App.SecondaryTextBrush}" VerticalAlignment="Center" />
-                            <TextBlock Text="标签" FontWeight="SemiBold" FontSize="12" Foreground="{DynamicResource App.SecondaryTextBrush}" VerticalAlignment="Center" />
-                        </StackPanel>
-                        <Button Grid.Column="1" Content="+" Classes="SmallButton" Command="{Binding AddTagCommand}" />
-                    </Grid>
-                    <ItemsControl ItemsSource="{Binding DisplayTags}">
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <ContentControl Content="{Binding}">
-                                    <ContentControl.ContentTemplate>
-                                        <templates:TagTemplateSelector />
-                                    </ContentControl.ContentTemplate>
-                                </ContentControl>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
+                        <!-- 分隔线 -->
+                        <Separator Margin="8,12,8,12" Background="{DynamicResource App.BorderBrush}" />
 
-                    <!-- 分隔线 -->
-                    <Separator Margin="8,12,8,12" Background="{DynamicResource App.BorderBrush}" />
+                        <!-- 标签分组 -->
+                        <Grid Margin="8,8,8,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="6">
+                                <icons:MaterialIcon Kind="Tag" Width="14" Height="14" Foreground="{DynamicResource App.SecondaryTextBrush}" VerticalAlignment="Center" />
+                                <TextBlock Text="标签" FontWeight="SemiBold" FontSize="12" Foreground="{DynamicResource App.SecondaryTextBrush}" VerticalAlignment="Center" />
+                            </StackPanel>
+                            <Button Grid.Column="1" Content="+" Classes="SmallButton" Command="{Binding AddTagCommand}" />
+                        </Grid>
+                        <ItemsControl ItemsSource="{Binding DisplayTags}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <ContentControl Content="{Binding}">
+                                        <ContentControl.ContentTemplate>
+                                            <templates:TagTemplateSelector />
+                                        </ContentControl.ContentTemplate>
+                                    </ContentControl>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
 
-                    <!-- 工作区分组 -->
-                    <Grid Margin="8,8,8,4">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-                        <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="6">
-                            <icons:MaterialIcon Kind="BriefcaseOutline" Width="14" Height="14" Foreground="{DynamicResource App.SecondaryTextBrush}" VerticalAlignment="Center" />
-                            <TextBlock Text="工作区" FontWeight="SemiBold" FontSize="12" Foreground="{DynamicResource App.SecondaryTextBrush}" VerticalAlignment="Center" />
-                        </StackPanel>
-                        <Button Grid.Column="1" Content="+" Classes="SmallButton" Command="{Binding AddWorkspaceCommand}" />
-                    </Grid>
-                    <ItemsControl ItemsSource="{Binding Workspaces}">
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <Button Content="{Binding}" Classes="NavigationButton" />
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
+                        <!-- 分隔线 -->
+                        <Separator Margin="8,12,8,12" Background="{DynamicResource App.BorderBrush}" />
 
-                    <!-- 分隔线 -->
-                    <Separator Margin="8,12,8,12" Background="{DynamicResource App.BorderBrush}" />
+                        <!-- 工作区分组 -->
+                        <Grid Margin="8,8,8,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="6">
+                                <icons:MaterialIcon Kind="BriefcaseOutline" Width="14" Height="14" Foreground="{DynamicResource App.SecondaryTextBrush}" VerticalAlignment="Center" />
+                                <TextBlock Text="工作区" FontWeight="SemiBold" FontSize="12" Foreground="{DynamicResource App.SecondaryTextBrush}" VerticalAlignment="Center" />
+                            </StackPanel>
+                            <Button Grid.Column="1" Content="+" Classes="SmallButton" Command="{Binding AddWorkspaceCommand}" />
+                        </Grid>
+                        <ItemsControl ItemsSource="{Binding Workspaces}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Button Content="{Binding}" Classes="NavigationButton" />
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
 
-                    <!-- 设置 -->
-                    <TextBlock Text="设置" FontWeight="SemiBold" FontSize="12" Foreground="{DynamicResource App.SecondaryTextBrush}" Margin="8,8,8,4" />
-                    <Button Classes="NavigationButton" Command="{Binding ShowIdeSettingsCommand}">
-                        <StackPanel Orientation="Horizontal" Spacing="8">
-                            <icons:MaterialIcon Kind="Cog" Width="16" Height="16" />
-                            <TextBlock Text="IDE设置" VerticalAlignment="Center" />
-                        </StackPanel>
-                    </Button>
-                    <Grid Margin="0,4,0,0" ColumnDefinitions="*,*">
+                        <!-- 分隔线 -->
+                        <Separator Margin="8,12,8,12" Background="{DynamicResource App.BorderBrush}" />
+
+                        <!-- 设置 -->
+                        <TextBlock Text="设置" FontWeight="SemiBold" FontSize="12" Foreground="{DynamicResource App.SecondaryTextBrush}" Margin="8,8,8,4" />
+                        <Button Classes="NavigationButton" Command="{Binding ShowIdeSettingsCommand}">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <icons:MaterialIcon Kind="Cog" Width="16" Height="16" />
+                                <TextBlock Text="IDE设置" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                </ScrollViewer>
+
+                <!-- 主题切换 - 固定在左下角 -->
+                <Border Grid.Row="1"
+                        Background="{DynamicResource App.SidebarBackgroundBrush}"
+                        BorderBrush="{DynamicResource App.BorderBrush}"
+                        BorderThickness="0,1,0,0"
+                        Padding="8,6">
+                    <Grid ColumnDefinitions="*,*">
                         <ToggleButton Grid.Column="0"
                                       Classes="NavigationButton"
                                       IsChecked="{Binding IsLightTheme}"
@@ -162,8 +177,8 @@
                             </StackPanel>
                         </ToggleButton>
                     </Grid>
-                </StackPanel>
-            </ScrollViewer>
+                </Border>
+            </Grid>
         </Border>
 
         <!-- 右侧内容区 -->
@@ -206,6 +221,12 @@
                             <StackPanel Orientation="Horizontal" Spacing="6">
                                 <icons:MaterialIcon Kind="Cog" Width="14" Height="14" />
                                 <TextBlock Text="IDE设置" FontSize="13" />
+                            </StackPanel>
+                        </Button>
+                        <Button Classes="ToolButton" Command="{Binding RefreshDataCommand}" ToolTip.Tip="刷新列表数据">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <icons:MaterialIcon Kind="{x:Static micons:MaterialIconKind.Refresh}" Width="14" Height="14" />
+                                <TextBlock Text="刷新" FontSize="13" />
                             </StackPanel>
                         </Button>
                         <Button Click="AddProjectButton_Click"

@@ -409,6 +409,7 @@ namespace ProjectHub.Desktop.ViewModels
                         var project = viewModel.CreateProject();
                         await _projectService.AddProjectAsync(project);
                         await LoadProjects();
+                        ApplyFilter();
                         await LoadTags();
                     }
                 }
@@ -560,6 +561,8 @@ namespace ProjectHub.Desktop.ViewModels
                 if (result == true)
                 {
                     await LoadWorkspaces();
+                    await LoadWorkspacesForList();
+                    ApplyFilter();
                 }
             }
         }
@@ -664,6 +667,14 @@ namespace ProjectHub.Desktop.ViewModels
                     await LoadWorkspacesForList();
                 }
             }
+        }
+
+        [RelayCommand]
+        private async Task RefreshData()
+        {
+            await LoadTags();
+            await LoadDataAsync();
+            await LoadAvailableIdesAsync();
         }
 
         [RelayCommand]
